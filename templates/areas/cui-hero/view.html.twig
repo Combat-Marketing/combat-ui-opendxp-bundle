@@ -1,0 +1,36 @@
+{# Hero brick — @CombatUICore hero section driven by the dialog-box editables. #}
+{% set background = opendxp_image('background') %}
+{% set media = opendxp_image('media') %}
+
+{% set props = {
+    variant: opendxp_select('variant').getData(),
+    align: opendxp_select('align').getData(),
+    width: opendxp_select('width').getData(),
+    media_position: opendxp_select('media_position').getData(),
+    title_tag: opendxp_select('title_tag').getData(),
+    eyebrow: opendxp_input('eyebrow').getData(),
+    title: opendxp_input('title').getData(),
+    lead: opendxp_textarea('lead').getData(),
+}|filter(value => value is not empty) %}
+
+{% if not background.isEmpty() %}
+    {% set props = props|merge({background_image: background.getSrc()}) %}
+{% endif %}
+
+{% set has_actions = editmode
+    or not opendxp_link('link_primary').isEmpty()
+    or not opendxp_link('link_secondary').isEmpty() %}
+
+{% cui 'hero' with props %}
+    {{ opendxp_wysiwyg('content') }}
+
+    {% if has_actions %}
+        {% cui_slot 'actions' %}
+            {% include '@CombatUIOpenDxp/areas/_partials/actions.html.twig' %}
+        {% endcui_slot %}
+    {% endif %}
+
+    {% if editmode or not media.isEmpty() %}
+        {% cui_slot 'media' %}{{ media|raw }}{% endcui_slot %}
+    {% endif %}
+{% endcui %}

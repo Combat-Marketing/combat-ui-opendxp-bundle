@@ -1,0 +1,35 @@
+{# Map brick — <cui-map> with marker block; markers are edited as label/lat/lng rows in editmode. #}
+{% set center = opendxp_input('center').getData()|default('52.37,4.89') %}
+{% set zoom = opendxp_numeric('zoom').getData()|default('11') %}
+
+{% cui 'section' with {container: 'default'} %}
+    {% if editmode %}
+        <div class="cui-stack">
+            <p class="cui-eyebrow">Map markers</p>
+            {% for i in opendxp_iterate_block(opendxp_block('points')) %}
+                <div class="cui-cluster">
+                    {{ opendxp_input('label', {placeholder: 'Label'}) }}
+                    {{ opendxp_input('lat', {placeholder: 'Latitude', width: 130}) }}
+                    {{ opendxp_input('lng', {placeholder: 'Longitude', width: 130}) }}
+                </div>
+            {% endfor %}
+            <p>The interactive map renders on the published page; set center, zoom and behaviour in the brick dialog.</p>
+        </div>
+    {% else %}
+        <cui-map{{ cui_attrs({
+            center: center,
+            zoom: zoom,
+            cluster: opendxp_checkbox('cluster').isChecked(),
+            'fit-bounds': opendxp_checkbox('fit_bounds').isChecked(),
+            'scroll-wheel-zoom': opendxp_checkbox('scroll_wheel_zoom').isChecked(),
+        }) }}>
+            {% for i in opendxp_iterate_block(opendxp_block('points')) %}
+                {% set lat = opendxp_input('lat').getData() %}
+                {% set lng = opendxp_input('lng').getData() %}
+                {% if lat and lng %}
+                    <span class="cui-map-point" data-lat="{{ lat }}" data-lng="{{ lng }}">{{ opendxp_input('label').getData() }}</span>
+                {% endif %}
+            {% endfor %}
+        </cui-map>
+    {% endif %}
+{% endcui %}

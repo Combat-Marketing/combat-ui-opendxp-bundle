@@ -1,0 +1,51 @@
+{
+    "name": "combat-ui/core-opendxp-bundle",
+    "description": "OpenDXP wrapper bundle for Combat UI: curated, configurable areabricks built on the Combat UI Core Symfony bundle",
+    "license": "GPL-3.0-or-later",
+    "type": "opendxp-bundle",
+    "authors": [
+        {
+            "name": "Jessica Benedictus",
+            "email": "jessica@combat.nl"
+        },
+        {
+            "name": "Christiaan van Dam",
+            "email": "chris@combat.nl"
+        }
+    ],
+    "require": {
+        "php": "~8.4.0 || ~8.5.0",
+        "combat-ui/core-bundle": "^0.6.1.2",
+        "open-dxp/opendxp": "^1.0"
+    },
+    "require-dev": {
+        "codeception/codeception": "^5.3.5",
+        "codeception/stub": "^4.3",
+        "codeception/module-asserts": "^3.2",
+        "codeception/module-symfony": "^3.8",
+        "phpstan/phpstan": "2.1.33",
+        "phpstan/phpstan-symfony": "^2.0.9",
+        "phpunit/phpunit": "^10.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "CombatUI\\CombatUIOpenDxpBundle\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "CombatUI\\CombatUIOpenDxpBundle\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "codecept run Unit",
+        "test:build": "codecept build"
+    },
+    "extra": {
+        "opendxp": {
+            "bundles": [
+                "CombatUI\\CombatUIOpenDxpBundle\\CombatUIOpenDxpBundle"
+            ]
+        }
+    }
+}

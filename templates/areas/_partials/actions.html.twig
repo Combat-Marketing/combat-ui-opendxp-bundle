@@ -1,0 +1,18 @@
+{#
+    Shared actions row: two link editables rendered as Combat UI buttons.
+    In editmode the link editables render their own editing UI; on the
+    frontend they become .cui-button anchors.
+#}
+{% set link_primary = opendxp_link('link_primary') %}
+{% set link_secondary = opendxp_link('link_secondary') %}
+{% if editmode %}
+    {{ link_primary|raw }}
+    {{ link_secondary|raw }}
+{% else %}
+    {% if not link_primary.isEmpty() %}
+        <a class="cui-button" data-variant="primary" href="{{ link_primary.getHref() }}"{% if link_primary.getTarget() %} target="{{ link_primary.getTarget() }}"{% endif %}>{{ link_primary.getText() }}</a>
+    {% endif %}
+    {% if not link_secondary.isEmpty() %}
+        <a class="cui-button" href="{{ link_secondary.getHref() }}"{% if link_secondary.getTarget() %} target="{{ link_secondary.getTarget() }}"{% endif %}>{{ link_secondary.getText() }}</a>
+    {% endif %}
+{% endif %}

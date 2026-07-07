@@ -1,0 +1,18 @@
+{# Accordion brick — block of @CombatUICore disclosure components. #}
+{% set variant = opendxp_select('variant').getData() %}
+{% set open_first = opendxp_checkbox('open_first').isChecked() %}
+
+{% cui 'section' with {container: 'default'} %}
+    <div class="cui-stack">
+        {% for i in opendxp_iterate_block(opendxp_block('items')) %}
+            {% set item_props = {
+                variant: variant,
+                open: editmode or (open_first and loop.first),
+            }|filter(value => value is not empty) %}
+            {% cui 'disclosure' with item_props %}
+                {% cui_slot 'summary' %}{{ opendxp_input('summary', {placeholder: 'Summary'}) }}{% endcui_slot %}
+                {{ opendxp_wysiwyg('body') }}
+            {% endcui %}
+        {% endfor %}
+    </div>
+{% endcui %}

@@ -1,0 +1,61 @@
+{# Card-grid brick — block of .cui-article-card items laid out with the @CombatUICore grid layout. #}
+{% set card_variant = opendxp_select('card_variant').getData()|default('') %}
+{% set container = opendxp_select('container').getData()|default('') %}
+{% set section_props = {
+    spacing: opendxp_select('spacing').getData(),
+    tone: opendxp_select('tone').getData(),
+}|filter(value => value is not empty) %}
+{% if container != 'none' %}
+    {% set section_props = section_props|merge({container: container ?: 'default'}) %}
+{% endif %}
+
+{% set grid_props = {
+    columns: opendxp_select('columns').getData(),
+    gap: opendxp_select('gap').getData(),
+    min: '18rem',
+}|filter(value => value is not empty) %}
+
+{% cui 'section' with section_props %}
+    {% cui 'grid' with grid_props %}
+        {% for i in opendxp_iterate_block(opendxp_block('cards')) %}
+            {% set image = opendxp_image('image') %}
+            {% set link = opendxp_link('link') %}
+            {% set category_editable = opendxp_input('category', {placeholder: 'Category'}) %}
+            {% set title_editable = opendxp_input('title', {placeholder: 'Card title'}) %}
+            {% set text_editable = opendxp_textarea('text', {placeholder: 'Excerpt'}) %}
+            {% set category = category_editable.getData() %}
+            <article{{ cui_attrs({
+                class: ['cui-surface', 'cui-article-card'],
+                'data-variant': card_variant ?: null,
+                'data-category': category ? category|lower : null,
+            }) }}>
+                {% if card_variant != 'compact' and (editmode or not image.isEmpty()) %}
+                    <div class="cui-article-card-media">{{ image|raw }}</div>
+                {% endif %}
+                <div class="cui-stack">
+                    {% if editmode %}
+                        <p class="cui-eyebrow">{{ category_editable|raw }}</p>
+                        <h3 class="cui-display">{{ title_editable|raw }}</h3>
+                        <p>{{ text_editable|raw }}</p>
+                        {{ link|raw }}
+                    {% else %}
+                        {% set title = title_editable.getData() %}
+                        {% set text = text_editable.getData() %}
+                        {% if category %}<p class="cui-eyebrow">{{ category }}</p>{% endif %}
+                        {% if title %}
+                            <h3 class="cui-display">
+                                {%- if not link.isEmpty() %}<a href="{{ link.getHref() }}">{{ title }}</a>{% else %}{{ title }}{% endif -%}
+                            </h3>
+                        {% endif %}
+                        {% if text %}<p>{{ text }}</p>{% endif %}
+                        {% if not link.isEmpty() and link.getText() %}
+                            <div class="cui-cluster">
+                                <a class="cui-button" href="{{ link.getHref() }}"{% if link.getTarget() %} target="{{ link.getTarget() }}"{% endif %}>{{ link.getText() }}</a>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </article>
+        {% endfor %}
+    {% endcui %}
+{% endcui %}

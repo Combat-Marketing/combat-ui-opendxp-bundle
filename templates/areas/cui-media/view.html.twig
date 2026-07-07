@@ -1,0 +1,15 @@
+{# Image brick — single image with optional caption inside a section band. #}
+{% set width = opendxp_select('width').getData()|default('') %}
+{% set section_props = width != 'none' ? {container: width ?: 'default'} : {} %}
+{% set caption_editable = opendxp_input('caption', {placeholder: 'Caption (optional)'}) %}
+
+{% cui 'section' with section_props %}
+    <figure class="cui-stack">
+        {{ opendxp_image('image') }}
+        {% if editmode %}
+            <figcaption>{{ caption_editable|raw }}</figcaption>
+        {% elseif caption_editable.getData() %}
+            <figcaption>{{ caption_editable.getData() }}</figcaption>
+        {% endif %}
+    </figure>
+{% endcui %}

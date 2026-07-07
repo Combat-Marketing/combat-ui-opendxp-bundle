@@ -1,0 +1,30 @@
+{# Call-to-action brick — @CombatUICore cta block inside a section band. #}
+{% set section_props = {
+    container: 'default',
+    spacing: opendxp_select('spacing').getData(),
+}|filter(value => value is not empty) %}
+
+{% set props = {
+    variant: opendxp_select('variant').getData(),
+    tone: opendxp_select('tone').getData(),
+    title_tag: opendxp_select('title_tag').getData(),
+    eyebrow: opendxp_input('eyebrow').getData(),
+    title: opendxp_input('title').getData(),
+    lead: opendxp_textarea('lead').getData(),
+}|filter(value => value is not empty) %}
+
+{% set has_actions = editmode
+    or not opendxp_link('link_primary').isEmpty()
+    or not opendxp_link('link_secondary').isEmpty() %}
+
+{% cui 'section' with section_props %}
+    {% cui 'cta' with props %}
+        {{ opendxp_wysiwyg('content') }}
+
+        {% if has_actions %}
+            {% cui_slot 'actions' %}
+                {% include '@CombatUIOpenDxp/areas/_partials/actions.html.twig' %}
+            {% endcui_slot %}
+        {% endif %}
+    {% endcui %}
+{% endcui %}

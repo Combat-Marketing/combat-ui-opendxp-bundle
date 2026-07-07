@@ -1,0 +1,29 @@
+{# Page-intro brick — @CombatUICore page-intro section driven by the dialog-box editables. #}
+{% set props = {
+    variant: opendxp_select('variant').getData(),
+    tone: opendxp_select('tone').getData(),
+    align: opendxp_select('align').getData(),
+    title_tag: opendxp_select('title_tag').getData(),
+    eyebrow: opendxp_input('eyebrow').getData(),
+    title: opendxp_input('title').getData(),
+    lead: opendxp_textarea('lead').getData(),
+}|filter(value => value is not empty) %}
+
+{% set meta = (opendxp_textarea('meta').getData() ?? '')|split("\n")|map(entry => entry|trim)|filter(entry => entry is not empty) %}
+{% if meta is not empty %}
+    {% set props = props|merge({meta: meta}) %}
+{% endif %}
+
+{% set has_actions = editmode
+    or not opendxp_link('link_primary').isEmpty()
+    or not opendxp_link('link_secondary').isEmpty() %}
+
+{% cui 'page-intro' with props %}
+    {{ opendxp_wysiwyg('content') }}
+
+    {% if has_actions %}
+        {% cui_slot 'actions' %}
+            {% include '@CombatUIOpenDxp/areas/_partials/actions.html.twig' %}
+        {% endcui_slot %}
+    {% endif %}
+{% endcui %}

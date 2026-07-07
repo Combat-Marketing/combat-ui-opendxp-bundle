@@ -1,0 +1,39 @@
+{# Carousel brick — block of image slides; stacked while editing, <cui-carousel> on the frontend. #}
+{% set width = opendxp_select('width').getData()|default('') %}
+{% set section_props = width != 'none' ? {container: width ?: 'default'} : {} %}
+
+{% cui 'section' with section_props %}
+    {% if editmode %}
+        <div class="cui-stack">
+            <p class="cui-eyebrow">Slides</p>
+            {% for i in opendxp_iterate_block(opendxp_block('slides')) %}
+                <figure class="cui-stack">
+                    {{ opendxp_image('image') }}
+                    <figcaption>{{ opendxp_input('caption', {placeholder: 'Caption (optional)'}) }}</figcaption>
+                </figure>
+            {% endfor %}
+        </div>
+    {% else %}
+        {% set autoplay = opendxp_checkbox('autoplay').isChecked() %}
+        {% set interval = opendxp_numeric('interval').getData() %}
+        <cui-carousel{{ cui_attrs({
+            autoplay: autoplay,
+            interval: autoplay and interval ? interval : null,
+            transition: opendxp_select('transition').getData()|default(null),
+            loop: opendxp_checkbox('no_loop').isChecked() ? 'false' : null,
+            controls: opendxp_checkbox('hide_controls').isChecked() ? 'false' : null,
+            pagination: opendxp_checkbox('hide_pagination').isChecked() ? 'false' : null,
+        }) }}>
+            {% for i in opendxp_iterate_block(opendxp_block('slides')) %}
+                {% set image = opendxp_image('image') %}
+                {% set caption = opendxp_input('caption').getData() %}
+                {% if not image.isEmpty() %}
+                    <figure slot="slide">
+                        {{ image|raw }}
+                        {% if caption %}<figcaption>{{ caption }}</figcaption>{% endif %}
+                    </figure>
+                {% endif %}
+            {% endfor %}
+        </cui-carousel>
+    {% endif %}
+{% endcui %}

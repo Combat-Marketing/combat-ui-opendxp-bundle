@@ -1,0 +1,15 @@
+{# Rich-text brick — inline WYSIWYG in a .cui-prose column inside a section band. #}
+{% set container = opendxp_select('container').getData()|default('') %}
+{% set section_props = {
+    spacing: opendxp_select('spacing').getData(),
+    tone: opendxp_select('tone').getData(),
+}|filter(value => value is not empty) %}
+{% if container != 'none' %}
+    {% set section_props = section_props|merge({container: container ?: 'default'}) %}
+{% endif %}
+
+{% cui 'section' with section_props %}
+    <div class="cui-prose">
+        {{ opendxp_wysiwyg('content') }}
+    </div>
+{% endcui %}

@@ -1,0 +1,26 @@
+{# Tabs brick — block of label + rich-text panels; stacked while editing, <cui-tabs> on the frontend. #}
+{% cui 'section' with {container: 'default'} %}
+    {% if editmode %}
+        <div class="cui-stack">
+            {% for i in opendxp_iterate_block(opendxp_block('tabs')) %}
+                <section class="cui-surface cui-stack" style="padding: var(--cui-space-5, 1.5rem);">
+                    <p class="cui-eyebrow">Tab {{ loop.index }}</p>
+                    {{ opendxp_input('label', {placeholder: 'Tab label'}) }}
+                    {{ opendxp_wysiwyg('content') }}
+                </section>
+            {% endfor %}
+        </div>
+    {% else %}
+        {% set labels = [] %}
+        {% for i in opendxp_iterate_block(opendxp_block('tabs')) %}
+            {% set labels = labels|merge([opendxp_input('label').getData()|default('Tab ' ~ loop.index)]) %}
+        {% endfor %}
+        {% if labels is not empty %}
+            {% cui 'tabs' with {tabs: labels} %}
+                {% for i in opendxp_iterate_block(opendxp_block('tabs')) %}
+                    <section class="cui-stack">{{ opendxp_wysiwyg('content') }}</section>
+                {% endfor %}
+            {% endcui %}
+        {% endif %}
+    {% endif %}
+{% endcui %}
