@@ -16,13 +16,16 @@ namespace CombatUI\CombatUIOpenDxpBundle;
 use CombatUI\Bundle\CoreBundle\CombatUICoreBundle;
 use OpenDxp\Extension\Bundle\AbstractOpenDxpBundle;
 use OpenDxp\Extension\Bundle\Installer\InstallerInterface;
+use OpenDxp\Extension\Bundle\OpenDxpBundleAdminClassicInterface;
+use OpenDxp\Extension\Bundle\Traits\BundleAdminClassicTrait;
 use OpenDxp\Extension\Bundle\Traits\PackageVersionTrait;
 use OpenDxp\HttpKernel\Bundle\DependentBundleInterface;
 use OpenDxp\HttpKernel\BundleCollection\BundleCollection;
 use Symfony\WebpackEncoreBundle\WebpackEncoreBundle;
 
-class CombatUIOpenDxpBundle extends AbstractOpenDxpBundle implements DependentBundleInterface
+class CombatUIOpenDxpBundle extends AbstractOpenDxpBundle implements DependentBundleInterface, OpenDxpBundleAdminClassicInterface
 {
+    use BundleAdminClassicTrait;
     use PackageVersionTrait;
 
     public function getNiceName(): string
@@ -39,6 +42,21 @@ class CombatUIOpenDxpBundle extends AbstractOpenDxpBundle implements DependentBu
     {
         $collection->addBundle(new WebpackEncoreBundle());
         $collection->addBundle(new CombatUICoreBundle());
+    }
+
+    public function getJsPaths(): array
+    {
+        return [
+            '/bundles/combatuiopendxp/js/startup.js',
+            '/bundles/combatuiopendxp/js/theme-editor.js',
+        ];
+    }
+
+    public function getCssPaths(): array
+    {
+        return [
+            '/bundles/combatuiopendxp/css/admin.css',
+        ];
     }
 
     public function getInstaller(): ?InstallerInterface

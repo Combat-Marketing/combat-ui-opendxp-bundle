@@ -1,0 +1,86 @@
+{
+  "schemaVersion": "1.2.0",
+  "blocks": [],
+  "tokenGroups": [
+    {
+      "name": "typography",
+      "selector": ":root",
+      "summary": "Font family, fluid size scale, line heights, weights.",
+      "tokens": [
+        {
+          "name": "--cui-font-family",
+          "description": "Default sans stack.",
+          "value": "\"Inter\", ui-sans-serif, system-ui, sans-serif"
+        },
+        {
+          "name": "--cui-font-size-0",
+          "description": "Body copy.",
+          "value": "clamp(0.9375rem, 0.9rem + 0.16vi, 1rem)"
+        }
+      ]
+    },
+    {
+      "name": "color-base",
+      "selector": ":root",
+      "summary": "Light-theme color tokens.",
+      "tokens": [
+        {
+          "name": "--cui-color",
+          "description": "Default foreground text color.",
+          "value": "oklch(24% 0.04 264deg)"
+        },
+        {
+          "name": "--cui-color-accent",
+          "description": "Primary accent (links, focus, brand fills).",
+          "value": "oklch(57% 0.18 246deg)"
+        }
+      ]
+    },
+    {
+      "name": "spacing",
+      "selector": ":root",
+      "summary": "Spacing scale.",
+      "tokens": [
+        {
+          "name": "--cui-space-1",
+          "description": "Tight inline gaps.",
+          "value": "0.25rem"
+        }
+      ]
+    },
+    {
+      "name": "color-dark",
+      "selector": ":where(:root[data-theme=\"dark\"], [data-theme=\"dark\"])",
+      "summary": "Dark-theme overrides for color and surface tokens.",
+      "tokens": [
+        {
+          "name": "--cui-color",
+          "description": "Inverted foreground.",
+          "value": "oklch(97.6% 0.009 259deg)"
+        },
+        {
+          "name": "--cui-color-inverse",
+          "description": "Foreground when reading against an inverse surface.",
+          "value": "oklch(13.2% 0.02 265deg)"
+        }
+      ]
+    },
+    {
+      "name": "color-light",
+      "selector": ":where(:root[data-theme=\"light\"], [data-theme=\"light\"])",
+      "summary": "Light-theme overrides (explicit opt-in).",
+      "tokens": [
+        {
+          "name": "--cui-color",
+          "description": "Light foreground.",
+          "value": "oklch(13.2% 0.02 265deg)"
+        },
+        {
+          "name": "--cui-color-inverse",
+          "description": "Foreground on an inverse (dark) surface.",
+          "value": "oklch(98.5% 0.005 265deg)"
+        }
+      ]
+    }
+  ]
+}

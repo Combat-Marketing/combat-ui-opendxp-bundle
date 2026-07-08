@@ -38,6 +38,7 @@ Load the Combat UI assets once in your document layout and expose an areablock f
 <html lang="{{ document.getProperty('language') }}">
     <head>
         {{ cui_assets() }}
+        {{ cui_theme_tokens() }}
     </head>
     <body>
         <main>
@@ -55,6 +56,25 @@ Load the Combat UI assets once in your document layout and expose an areablock f
 
 The bricks are full-width bands that bring their own `.cui-container` wrappers, so place the areablock
 in a full-bleed region of the layout rather than inside another container.
+
+## Theme editor
+
+The bundle adds a **Combat UI Theme** entry to the admin **Extras** menu (users need the
+`combat_ui_theme` permission, registered on install). The panel lists every Combat UI design token,
+grouped as in the framework's `tokens.css` — typography, colors, spacing, surfaces, and so on — with
+the framework default shown as placeholder. Color tokens take a separate **light** and **dark** value;
+the dark value feeds both the `prefers-color-scheme: dark` media query and the explicit
+`[data-theme="dark"]` pin, exactly mirroring the framework's selector structure.
+
+Saved overrides are stored in the OpenDXP settings store (scope `combat_ui`) and served as a
+generated stylesheet from `/cui/theme.css`. Add `{{ cui_theme_tokens() }}` to your layout **after**
+`{{ cui_assets() }}` — it renders a `<link>` with a content hash (long-lived immutable caching) and
+renders nothing while no token is overridden. Because tokens are CSS custom properties, no rebuild
+of the framework CSS is involved; the override stylesheet simply wins by cascade order.
+
+The token schema (groups, descriptions, defaults) is read from the `blocks.json` manifest shipped
+with the core bundle's prebuilt assets, so the editor stays in sync with the framework version you
+have installed.
 
 ## Bricks
 

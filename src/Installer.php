@@ -13,12 +13,62 @@ declare(strict_types=1);
 
 namespace CombatUI\CombatUIOpenDxpBundle;
 
+use CombatUI\CombatUIOpenDxpBundle\Controller\Admin\ThemeController;
+use OpenDxp\Db;
 use OpenDxp\Extension\Bundle\Installer\SettingsStoreAwareInstaller;
 
 /**
- * The bundle has no database schema or permissions to set up; the settings-store flag alone tracks the
- * installed state so the bundle can be enabled and disabled from the OpenDXP bundle manager.
+ * Registers the theme-editor user permission; the settings-store flag from the parent class
+ * tracks the installed state so the bundle can be enabled and disabled from the bundle manager.
  */
 class Installer extends SettingsStoreAwareInstaller
 {
+    protected const USER_PERMISSIONS_CATEGORY = 'Combat UI';
+
+    protected const USER_PERMISSIONS = [
+        ThemeController::PERMISSION,
+    ];
+
+    public function install(): void
+    {
+        $this->addUserPermissions();
+        parent::install();
+    }
+
+    public function uninstall(): void
+    {
+        $this->removeUserPermissions();
+        parent::uninstall();
+    }
+
+    private function addUserPermissions(): void
+    {
+        $db = Db::get();
+
+        foreach (static::USER_PERMISSIONS as $permission) {
+            $exists = $db->fetchOne(
+                'SELECT `key` FROM users_permission_definitions WHERE `key` = ?',
+                [$permission],
+            );
+            if ($exists) {
+                continue;
+            }
+
+            $db->insert('users_permission_definitions', [
+                $db->quoteIdentifier('key') => $permission,
+                $db->quoteIdentifier('category') => static::USER_PERMISSIONS_CATEGORY,
+            ]);
+        }
+    }
+
+    private function removeUserPermissions(): void
+    {
+        $db = Db::get();
+
+        foreach (static::USER_PERMISSIONS as $permission) {
+            $db->delete('users_permission_definitions', [
+                $db->quoteIdentifier('key') => $permission,
+            ]);
+        }
+    }
 }

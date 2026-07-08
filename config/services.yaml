@@ -8,3 +8,19 @@ services:
         public: true
         arguments:
             $bundle: "@=service('kernel').getBundle('CombatUIOpenDxpBundle')"
+
+    #
+    # THEME EDITOR
+    #
+
+    CombatUI\CombatUIOpenDxpBundle\Theme\TokenSchemaProvider: ~
+    CombatUI\CombatUIOpenDxpBundle\Theme\TokenOverrideValidator: ~
+    CombatUI\CombatUIOpenDxpBundle\Theme\ThemeSettings: ~
+    CombatUI\CombatUIOpenDxpBundle\Theme\ThemeCssGenerator: ~
+
+    CombatUI\CombatUIOpenDxpBundle\Twig\ThemeExtension: ~
+
+    CombatUI\CombatUIOpenDxpBundle\Controller\:
+        resource: '../src/Controller'
+        public: true
+        tags: ['controller.service_arguments']

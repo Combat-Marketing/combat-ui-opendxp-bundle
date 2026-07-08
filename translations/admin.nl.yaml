@@ -1,0 +1,7 @@
+combat_ui_theme: 'Combat UI-thema'
+combat_ui_theme_saved: 'Thema opgeslagen. Gepubliceerde pagina''s gebruiken direct de nieuwe tokens.'
+combat_ui_theme_load_error: 'De Combat UI-themagegevens konden niet worden geladen.'
+combat_ui_theme_clear_all: 'Alle overrides wissen'
+combat_ui_theme_clear_all_confirm: 'Alle overrides in het formulier wissen? Na opslaan gelden de standaardwaarden van het framework weer.'
+combat_ui_theme_light: 'Licht'
+combat_ui_theme_dark: 'Donker'

@@ -1,0 +1,10 @@
+combat_ui_opendxp_admin:
+    resource: "../../src/Controller/Admin/"
+    type: attribute
+    prefix: /admin/combat-ui
+    options:
+        expose: true
+
+combat_ui_opendxp_theme_css:
+    resource: "../../src/Controller/ThemeCssController.php"
+    type: attribute

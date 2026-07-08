@@ -1,0 +1,28 @@
+/*
+ * Combat UI OpenDXP Bundle — admin UI styles for the theme editor.
+ */
+
+.combat_ui_icon_theme {
+    background: url(/bundles/opendxpadmin/img/flat-color-icons/rgbacolor.svg) center center no-repeat !important;
+}
+
+.combat_ui_nav_icon_theme {
+    background: url(/bundles/opendxpadmin/img/flat-white-icons/rgbacolor.svg) center center no-repeat !important;
+}
+
+.combat_ui_theme_group_summary {
+    color: #666;
+    margin: 0 0 12px 0;
+}
+
+.combat_ui_theme_token_desc {
+    color: #888;
+    font-size: 11px;
+    margin: 2px 0 10px 290px;
+}
+
+.combat_ui_color_swatch {
+    width: 22px;
+    border-left: 1px solid #d0d0d0;
+    cursor: default;
+}

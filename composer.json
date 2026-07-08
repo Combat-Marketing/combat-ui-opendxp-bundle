@@ -15,7 +15,7 @@
     ],
     "require": {
         "php": "~8.4.0 || ~8.5.0",
-        "combat-ui/core-bundle": "^0.6.2",
+        "combat-ui/core-bundle": "^0.6.3",
         "open-dxp/opendxp": "^1.0"
     },
     "require-dev": {

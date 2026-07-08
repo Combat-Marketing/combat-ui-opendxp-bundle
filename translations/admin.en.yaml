@@ -1,0 +1,7 @@
+combat_ui_theme: 'Combat UI Theme'
+combat_ui_theme_saved: 'Theme saved. Published pages use the new tokens immediately.'
+combat_ui_theme_load_error: 'Could not load the Combat UI theme data.'
+combat_ui_theme_clear_all: 'Clear all overrides'
+combat_ui_theme_clear_all_confirm: 'Clear every override in the form? The framework defaults apply again after saving.'
+combat_ui_theme_light: 'Light'
+combat_ui_theme_dark: 'Dark'
