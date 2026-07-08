@@ -35,11 +35,11 @@
 {% cui 'section' with section_props %}
     {% if editmode %}
         <div class="cui-stack">
-            {% if has_media %}
-                {{ media|raw }}
-            {% else %}
-                {{ image|raw }}
-            {% endif %}
+            {%- if not video.isEmpty() -%}
+                {{- video|raw -}}
+            {%- else -%}
+                {{- image|raw -}}
+            {%- endif -%}
             {% if style == 'figure' %}
                 {{ caption_editable|raw }}
             {% endif %}
