@@ -40,8 +40,8 @@
     {% if editmode %}
         <div class="cui-stack">
             {# Offer both editables so an author can assign either — the frontend prefers the video. #}
-            {{ image|raw }}
-            {{ video|raw }}
+            Image: {{ image|raw }}
+            Video: {{ video|raw }}
             {% if style == 'figure' %}
                 {{ caption_editable|raw }}
             {% endif %}
