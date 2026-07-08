@@ -55,6 +55,8 @@ class CardGrid extends AbstractCuiAreabrick implements EditableDialogBoxInterfac
                         ['flat', 'Flat'],
                         ['borderless', 'Borderless'],
                     ]),
+                    $this->checkboxField('show_filter', 'Show category filter chips', 'Client-side filter built from the card category values.'),
+                    $this->inputField('filter_label', 'Filter label', 'Defaults to "Filter".'),
                 ],
                 'Section' => [
                     $this->selectField('spacing', 'Section spacing', [

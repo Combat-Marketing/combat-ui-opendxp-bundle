@@ -11,12 +11,18 @@ use CombatUI\CombatUIOpenDxpBundle\Document\Areabrick\Accordion;
 use CombatUI\CombatUIOpenDxpBundle\Document\Areabrick\CallToAction;
 use CombatUI\CombatUIOpenDxpBundle\Document\Areabrick\CardGrid;
 use CombatUI\CombatUIOpenDxpBundle\Document\Areabrick\Carousel;
+use CombatUI\CombatUIOpenDxpBundle\Document\Areabrick\ContactCards;
+use CombatUI\CombatUIOpenDxpBundle\Document\Areabrick\Events;
+use CombatUI\CombatUIOpenDxpBundle\Document\Areabrick\FeatureGrid;
 use CombatUI\CombatUIOpenDxpBundle\Document\Areabrick\Hero;
+use CombatUI\CombatUIOpenDxpBundle\Document\Areabrick\LogoStrip;
 use CombatUI\CombatUIOpenDxpBundle\Document\Areabrick\Map;
 use CombatUI\CombatUIOpenDxpBundle\Document\Areabrick\Media;
 use CombatUI\CombatUIOpenDxpBundle\Document\Areabrick\PageIntro;
 use CombatUI\CombatUIOpenDxpBundle\Document\Areabrick\RichText;
+use CombatUI\CombatUIOpenDxpBundle\Document\Areabrick\Stats;
 use CombatUI\CombatUIOpenDxpBundle\Document\Areabrick\Tabs;
+use CombatUI\CombatUIOpenDxpBundle\Document\Areabrick\Team;
 use OpenDxp\Extension\Document\Areabrick\Attribute\AsAreabrick;
 use OpenDxp\Extension\Document\Areabrick\EditableDialogBoxInterface;
 use OpenDxp\Extension\Document\Areabrick\TemplateAreabrickInterface;
@@ -34,12 +40,18 @@ final class AreabrickDefinitionsTest extends Unit
             'page intro' => [PageIntro::class, 'cui-page-intro', ['eyebrow', 'title', 'lead', 'meta', 'variant', 'title_tag', 'tone', 'align']],
             'call to action' => [CallToAction::class, 'cui-cta', ['eyebrow', 'title', 'lead', 'variant', 'title_tag', 'tone', 'spacing']],
             'rich text' => [RichText::class, 'cui-content', ['spacing', 'tone', 'container']],
-            'card grid' => [CardGrid::class, 'cui-card-grid', ['columns', 'gap', 'card_variant', 'spacing', 'tone', 'container']],
+            'card grid' => [CardGrid::class, 'cui-card-grid', ['columns', 'gap', 'card_variant', 'show_filter', 'filter_label', 'spacing', 'tone', 'container']],
             'accordion' => [Accordion::class, 'cui-accordion', ['variant', 'open_first']],
             'tabs' => [Tabs::class, 'cui-tabs', []],
             'carousel' => [Carousel::class, 'cui-carousel', ['autoplay', 'interval', 'transition', 'no_loop', 'hide_controls', 'hide_pagination', 'width']],
             'media' => [Media::class, 'cui-media', ['style', 'ratio', 'video', 'banner_link', 'eyebrow', 'title', 'width', 'align', 'orient_row', 'reverse', 'card_style', 'scrim', 'no_radius']],
             'map' => [Map::class, 'cui-map', ['center', 'zoom', 'cluster', 'fit_bounds', 'scroll_wheel_zoom']],
+            'feature grid' => [FeatureGrid::class, 'cui-feature-grid', ['columns', 'gap', 'align', 'spacing', 'tone', 'container']],
+            'statistics' => [Stats::class, 'cui-stats', ['columns', 'gap', 'align', 'spacing', 'tone', 'container']],
+            'logo strip' => [LogoStrip::class, 'cui-logo-strip', ['spacing', 'tone', 'container']],
+            'team' => [Team::class, 'cui-team', ['variant', 'photo_shape', 'align', 'columns', 'gap', 'spacing', 'tone', 'container']],
+            'events' => [Events::class, 'cui-events', ['columns', 'variant', 'spacing', 'tone', 'container']],
+            'contact cards' => [ContactCards::class, 'cui-contact', ['columns', 'variant', 'align', 'spacing', 'tone', 'container']],
         ];
     }
 

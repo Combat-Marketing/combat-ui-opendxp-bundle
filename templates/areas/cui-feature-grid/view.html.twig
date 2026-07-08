@@ -1,0 +1,40 @@
+{# Feature-grid brick — block of @CombatUICore feature cards in a grid. #}
+{% set container = opendxp_select('container').getData()|default('') %}
+{% set section_props = {
+    spacing: opendxp_select('spacing').getData(),
+    tone: opendxp_select('tone').getData(),
+}|filter(value => value is not empty) %}
+{% if container != 'none' %}
+    {% set section_props = section_props|merge({container: container ?: 'default'}) %}
+{% endif %}
+
+{% set align = opendxp_select('align').getData()|default('') %}
+{% set grid_props = {
+    columns: opendxp_select('columns').getData(),
+    gap: opendxp_select('gap').getData(),
+    min: '18rem',
+}|filter(value => value is not empty) %}
+
+{% cui 'section' with section_props %}
+    {% cui 'grid' with grid_props %}
+        {% for i in opendxp_iterate_block(opendxp_block('features')) %}
+            {% if editmode %}
+                <div class="cui-surface cui-stack" style="padding: var(--cui-space-5, 1.5rem);">
+                    {{ opendxp_input('icon', {placeholder: 'Icon / number', width: 130}) }}
+                    {{ opendxp_input('title', {placeholder: 'Feature title'}) }}
+                    {{ opendxp_textarea('text', {placeholder: 'Copy'}) }}
+                </div>
+            {% else %}
+                {% set card_props = {
+                    icon: opendxp_input('icon').getData(),
+                    title: opendxp_input('title').getData(),
+                    align: align,
+                }|filter(value => value is not empty) %}
+                {% set text = opendxp_textarea('text').getData() %}
+                {% cui 'feature-card' with card_props %}
+                    {% if text %}<p>{{ text }}</p>{% endif %}
+                {% endcui %}
+            {% endif %}
+        {% endfor %}
+    {% endcui %}
+{% endcui %}

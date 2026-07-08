@@ -111,4 +111,32 @@ abstract class AbstractCuiAreabrick extends AbstractTemplateAreabrick
             ->setLabel($label)
             ->setDialogDescription($description);
     }
+
+    /**
+     * The section-band selects shared by every full-width content brick.
+     *
+     * @return array<int, Select>
+     */
+    protected function sectionFields(): array
+    {
+        return [
+            $this->selectField('spacing', 'Section spacing', [
+                ['', 'Default'],
+                ['compact', 'Compact'],
+                ['spacious', 'Spacious'],
+            ]),
+            $this->selectField('tone', 'Tone', [
+                ['', 'Default'],
+                ['muted', 'Muted'],
+                ['inverse', 'Inverse'],
+                ['accent', 'Accent'],
+            ]),
+            $this->selectField('container', 'Container width', [
+                ['', 'Default'],
+                ['narrow', 'Narrow'],
+                ['wide', 'Wide'],
+                ['none', 'None (full width)'],
+            ]),
+        ];
+    }
 }

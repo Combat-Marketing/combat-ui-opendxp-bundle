@@ -1,8 +1,9 @@
 {#
-    Media brick — the four Combat UI media blocks:
-    figure (.cui-figure), full-width (.cui-media-full), media card (.cui-media-card)
-    and overlay card (.cui-media-overlay). The dialog picks the style and its
-    modifiers; image, caption, body copy and actions are edited inline.
+    Media brick — the four Combat UI media blocks plus a linked banner:
+    figure, full-width, banner, media card and overlay card. The frontend
+    delegates to the @CombatUICore media templates; the dialog picks the
+    style and its modifiers; image, caption, body copy and actions are
+    edited inline.
 #}
 {% set style = opendxp_select('style').getData()|default('') %}
 {% set style = style ?: 'figure' %}
@@ -52,12 +53,13 @@
         {% if has_media %}
             {% set banner_link = opendxp_link('banner_link') %}
             {% set block %}
-                <div{{ cui_attrs({
-                    class: ['cui-media-full'],
-                    'data-ratio': ratio,
-                    'data-bleed': full_width ? 'full' : null,
-                    'data-radius': opendxp_checkbox('no_radius').isChecked() ? 'none' : null,
-                }) }}>{{ media|raw }}</div>
+                {%- cui 'media-full' with {
+                    ratio: ratio,
+                    bleed: full_width,
+                    radius: opendxp_checkbox('no_radius').isChecked() ? 'none' : null,
+                } -%}
+                    {{- media|raw -}}
+                {%- endcui -%}
             {% endset %}
             {% if style == 'banner' and not banner_link.isEmpty() %}
                 <a{{ cui_attrs({
@@ -71,73 +73,72 @@
         {% endif %}
     {% elseif style == 'card' %}
         {% set card_style = opendxp_select('card_style').getData()|default('') %}
-        {% set media_region %}
-            {%- if has_media -%}
-                {%- set banner_link = opendxp_link('banner_link') -%}
-                {%- if not banner_link.isEmpty() -%}
-                    <a{{ cui_attrs({
-                        class: ['cui-media-card-media'],
-                        href: banner_link.getHref(),
-                        target: banner_link.getTarget() ?: null,
-                        'aria-label': banner_link.getText() ?: null,
-                    }) }}>{{ media|raw }}</a>
-                {%- else -%}
-                    <div class="cui-media-card-media">{{ media|raw }}</div>
-                {%- endif -%}
-            {%- endif -%}
-        {% endset %}
-        {% set reverse = opendxp_checkbox('reverse').isChecked() %}
-        <article{{ cui_attrs({
-            class: ['cui-surface', 'cui-media-card'],
-            'data-orient': opendxp_checkbox('orient_row').isChecked() ? 'row' : null,
-            'data-ratio': ratio,
-            'data-elevation': card_style == 'flat' ? 'flat' : null,
-            'data-variant': card_style == 'borderless' ? 'borderless' : null,
-        }) }}>
-            {% if not reverse %}{{ media_region|raw }}{% endif %}
-            <div class="cui-stack">
-                {% if eyebrow %}<p class="cui-eyebrow">{{ eyebrow }}</p>{% endif %}
-                {% if title %}<h3>{{ title }}</h3>{% endif %}
-                {{ opendxp_wysiwyg('body') }}
-                {% if has_actions %}
-                    <div class="cui-cluster">
-                        {% include '@CombatUIOpenDxp/areas/_partials/actions.html.twig' %}
-                    </div>
-                {% endif %}
-            </div>
-            {% if reverse %}{{ media_region|raw }}{% endif %}
-        </article>
+        {% set banner_link = opendxp_link('banner_link') %}
+        {% set linked_media = not banner_link.isEmpty() and video.isEmpty() and not image.isEmpty() %}
+        {% set card_props = {
+            orient: opendxp_checkbox('orient_row').isChecked() ? 'row' : null,
+            ratio: ratio,
+            elevation: card_style == 'flat' ? 'flat' : null,
+            variant: card_style == 'borderless' ? 'borderless' : null,
+            media_position: opendxp_checkbox('reverse').isChecked() ? 'end' : null,
+            eyebrow: eyebrow,
+            title: title,
+        }|filter(value => value is not empty) %}
+        {% if linked_media %}
+            {% set card_props = card_props|merge({
+                image: image.getSrc(),
+                image_alt: image.getAlt(),
+                href: banner_link.getHref(),
+            }) %}
+            {% if banner_link.getText() %}
+                {% set card_props = card_props|merge({media_label: banner_link.getText()}) %}
+            {% endif %}
+        {% endif %}
+        {% cui 'media-card' with card_props %}
+            {{ opendxp_wysiwyg('body') }}
+
+            {% if has_media and not linked_media %}
+                {% cui_slot 'media' %}{{ media|raw }}{% endcui_slot %}
+            {% endif %}
+
+            {% if has_actions %}
+                {% cui_slot 'actions' %}
+                    {% include '@CombatUIOpenDxp/areas/_partials/actions.html.twig' %}
+                {% endcui_slot %}
+            {% endif %}
+        {% endcui %}
     {% elseif style == 'overlay' %}
-        <article{{ cui_attrs({
-            class: ['cui-media-overlay'],
-            'data-align': align ?: null,
-            'data-scrim': opendxp_select('scrim').getData()|default(null),
-            'data-ratio': ratio,
-        }) }}>
-            {% if has_media %}<div class="cui-media-overlay-media">{{ media|raw }}</div>{% endif %}
-            <div class="cui-stack">
-                {% if eyebrow %}<p class="cui-eyebrow">{{ eyebrow }}</p>{% endif %}
-                {% if title %}<h3 class="cui-display">{{ title }}</h3>{% endif %}
-                {{ opendxp_wysiwyg('body') }}
-                {% if has_actions %}
-                    <div class="cui-cluster">
-                        {% include '@CombatUIOpenDxp/areas/_partials/actions.html.twig' %}
-                    </div>
-                {% endif %}
-            </div>
-        </article>
+        {% set overlay_props = {
+            align: align,
+            scrim: opendxp_select('scrim').getData(),
+            ratio: ratio,
+            eyebrow: eyebrow,
+            title: title,
+        }|filter(value => value is not empty) %}
+        {% cui 'media-overlay' with overlay_props %}
+            {{ opendxp_wysiwyg('body') }}
+
+            {% if has_media %}
+                {% cui_slot 'media' %}{{ media|raw }}{% endcui_slot %}
+            {% endif %}
+
+            {% if has_actions %}
+                {% cui_slot 'actions' %}
+                    {% include '@CombatUIOpenDxp/areas/_partials/actions.html.twig' %}
+                {% endcui_slot %}
+            {% endif %}
+        {% endcui %}
     {% else %}
-        {% set caption = caption_editable.getData() %}
         {% if has_media %}
-            <figure{{ cui_attrs({
-                class: ['cui-figure'],
-                'data-ratio': ratio,
-                'data-align': align == 'center' ? 'center' : null,
-                'data-bleed': full_width ? 'full' : null,
-            }) }}>
+            {% set figure_props = {
+                ratio: ratio,
+                align: align == 'center' ? 'center' : null,
+                bleed: full_width,
+                caption: caption_editable.getData(),
+            }|filter(value => value is not empty) %}
+            {% cui 'figure' with figure_props %}
                 <div class="cui-figure-media">{{ media|raw }}</div>
-                {% if caption %}<figcaption>{{ caption }}</figcaption>{% endif %}
-            </figure>
+            {% endcui %}
         {% endif %}
     {% endif %}
 {% endcui %}

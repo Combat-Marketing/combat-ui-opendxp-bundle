@@ -1,0 +1,62 @@
+{# Contact-cards brick — block of @CombatUICore contact cards in a grid. #}
+{% set container = opendxp_select('container').getData()|default('') %}
+{% set section_props = {
+    spacing: opendxp_select('spacing').getData(),
+    tone: opendxp_select('tone').getData(),
+}|filter(value => value is not empty) %}
+{% if container != 'none' %}
+    {% set section_props = section_props|merge({container: container ?: 'default'}) %}
+{% endif %}
+
+{% set variant = opendxp_select('variant').getData()|default('') %}
+{% set align = opendxp_select('align').getData()|default('') %}
+{% set grid_props = {
+    columns: opendxp_select('columns').getData(),
+    min: '18rem',
+}|filter(value => value is not empty) %}
+
+{% cui 'section' with section_props %}
+    {% cui 'grid' with grid_props %}
+        {% for i in opendxp_iterate_block(opendxp_block('cards')) %}
+            {% if editmode %}
+                <div class="cui-surface cui-stack" style="padding: var(--cui-space-5, 1.5rem);">
+                    {{ opendxp_input('eyebrow', {placeholder: 'Eyebrow (optional)'}) }}
+                    {{ opendxp_input('title', {placeholder: 'Card title'}) }}
+                    {{ opendxp_textarea('text', {placeholder: 'Short copy (optional)'}) }}
+                    {{ opendxp_input('email', {placeholder: 'Email (optional)'}) }}
+                    {{ opendxp_input('phone', {placeholder: 'Phone (optional)'}) }}
+                    {{ opendxp_link('link') }}
+                </div>
+            {% else %}
+                {% set email = opendxp_input('email').getData() %}
+                {% set phone = opendxp_input('phone').getData() %}
+                {% set text = opendxp_textarea('text').getData() %}
+                {% set link = opendxp_link('link') %}
+                {% set methods = [] %}
+                {% if email %}
+                    {% set methods = methods|merge([{term: 'Email', label: email, href: 'mailto:' ~ email}]) %}
+                {% endif %}
+                {% if phone %}
+                    {% set methods = methods|merge([{term: 'Phone', label: phone, href: 'tel:' ~ phone|replace({' ': ''})}]) %}
+                {% endif %}
+                {% set card_props = {
+                    eyebrow: opendxp_input('eyebrow').getData(),
+                    title: opendxp_input('title').getData(),
+                    variant: variant,
+                    align: align,
+                }|filter(value => value is not empty) %}
+                {% if methods is not empty %}
+                    {% set card_props = card_props|merge({methods: methods}) %}
+                {% endif %}
+                {% cui 'contact-card' with card_props %}
+                    {% if text %}<p>{{ text }}</p>{% endif %}
+                    {% if not link.isEmpty() and link.getText() %}
+                        {% cui_slot 'actions' %}
+                            <a class="cui-button" data-variant="primary" href="{{ link.getHref() }}"{% if link.getTarget() %} target="{{ link.getTarget() }}"{% endif %}>{{ link.getText() }}</a>
+                        {% endcui_slot %}
+                    {% endif %}
+                {% endcui %}
+            {% endif %}
+        {% endfor %}
+    {% endcui %}
+{% endcui %}

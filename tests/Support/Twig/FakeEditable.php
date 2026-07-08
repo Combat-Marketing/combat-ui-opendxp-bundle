@@ -40,6 +40,11 @@ final class FakeEditable implements \Stringable
         return is_string($this->data) ? $this->data : '';
     }
 
+    public function getAlt(): string
+    {
+        return '';
+    }
+
     public function getHref(): string
     {
         return is_array($this->data) ? ($this->data['href'] ?? '') : '';

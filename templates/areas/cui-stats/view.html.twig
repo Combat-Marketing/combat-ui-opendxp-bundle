@@ -1,0 +1,36 @@
+{# Statistics brick — block of @CombatUICore stat tiles in a grid. #}
+{% set container = opendxp_select('container').getData()|default('') %}
+{% set section_props = {
+    spacing: opendxp_select('spacing').getData(),
+    tone: opendxp_select('tone').getData(),
+}|filter(value => value is not empty) %}
+{% if container != 'none' %}
+    {% set section_props = section_props|merge({container: container ?: 'default'}) %}
+{% endif %}
+
+{% set align = opendxp_select('align').getData()|default('') %}
+{% set grid_props = {
+    columns: opendxp_select('columns').getData(),
+    gap: opendxp_select('gap').getData(),
+    min: '10rem',
+}|filter(value => value is not empty) %}
+
+{% cui 'section' with section_props %}
+    {% cui 'grid' with grid_props %}
+        {% for i in opendxp_iterate_block(opendxp_block('stats')) %}
+            {% if editmode %}
+                <div class="cui-surface cui-stack" style="padding: var(--cui-space-5, 1.5rem);">
+                    {{ opendxp_input('value', {placeholder: '42%', width: 130}) }}
+                    {{ opendxp_input('label', {placeholder: 'Label'}) }}
+                </div>
+            {% else %}
+                {% set stat_props = {
+                    value: opendxp_input('value').getData(),
+                    label: opendxp_input('label').getData(),
+                    align: align,
+                }|filter(value => value is not empty) %}
+                {% cui 'stat' with stat_props %}{% endcui %}
+            {% endif %}
+        {% endfor %}
+    {% endcui %}
+{% endcui %}

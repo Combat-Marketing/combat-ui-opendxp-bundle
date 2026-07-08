@@ -445,6 +445,187 @@ final class BrickTemplateRenderingTest extends Unit
         $this->assertStringContainsString('zoom="11"', $html);
     }
 
+    public function testFeatureGridFrontend(): void
+    {
+        $html = BrickTwigEnvironment::render(
+            'cui-feature-grid',
+            false,
+            ['columns' => '3', 'align' => 'center', 'icon' => '01', 'title' => 'Reusable structure', 'text' => 'Feature copy.'],
+            ['features' => 2],
+        );
+
+        $this->assertStringContainsString('data-columns="3"', $html);
+        $this->assertSame(2, substr_count($html, 'cui-feature-card'));
+        $this->assertStringContainsString('<article class="cui-surface cui-feature-card" data-align="center">', $html);
+        $this->assertStringContainsString('<span class="cui-feature-icon" aria-hidden="true">01</span>', $html);
+        $this->assertStringContainsString('<h3>Reusable structure</h3>', $html);
+        $this->assertStringContainsString('<p>Feature copy.</p>', $html);
+    }
+
+    public function testStatsFrontend(): void
+    {
+        $html = BrickTwigEnvironment::render(
+            'cui-stats',
+            false,
+            ['align' => 'center', 'value' => '42%', 'label' => 'Higher page reuse'],
+            ['stats' => 3],
+        );
+
+        $this->assertSame(3, substr_count($html, '<div class="cui-surface cui-stat" data-align="center">'));
+        $this->assertStringContainsString('<span class="cui-stat-value">42%</span>', $html);
+        $this->assertStringContainsString('<span class="cui-stat-label">Higher page reuse</span>', $html);
+    }
+
+    public function testLogoStripFrontend(): void
+    {
+        $withImage = BrickTwigEnvironment::render('cui-logo-strip', false, ['logo' => '/logo.svg'], ['logos' => 1]);
+        $this->assertStringContainsString('<div class="cui-surface cui-logo-item"><img src="/logo.svg" alt=""></div>', $withImage);
+
+        $labelOnly = BrickTwigEnvironment::render('cui-logo-strip', false, ['label' => 'Northstar'], ['logos' => 1]);
+        $this->assertStringContainsString('<div class="cui-surface cui-logo-item"><strong>Northstar</strong></div>', $labelOnly);
+    }
+
+    public function testTeamFrontend(): void
+    {
+        $html = BrickTwigEnvironment::render(
+            'cui-team',
+            false,
+            [
+                'variant' => 'flat',
+                'align' => 'center',
+                'photo_shape' => 'square',
+                'photo' => '/people/jane.jpg',
+                'name' => 'Jane Smith',
+                'role' => 'Staff engineer',
+                'meta' => 'Engineering',
+                'email' => 'jane@example.com',
+            ],
+            ['members' => 2],
+        );
+
+        $this->assertStringContainsString('<article class="cui-surface cui-person" data-align="center" data-photo="square" data-variant="flat">', $html);
+        $this->assertStringContainsString('<img class="cui-person-photo" src="/people/jane.jpg" alt="">', $html);
+        $this->assertStringContainsString('<p class="cui-person-meta">Engineering</p>', $html);
+        $this->assertStringContainsString('<h3 class="cui-person-name">Jane Smith</h3>', $html);
+        $this->assertStringContainsString('<a href="mailto:jane@example.com">jane@example.com</a>', $html);
+    }
+
+    public function testTeamLeadershipDefaults(): void
+    {
+        $html = BrickTwigEnvironment::render(
+            'cui-team',
+            false,
+            ['variant' => 'leadership', 'name' => 'Chief Person', 'bio' => 'Founder story.'],
+            ['members' => 1],
+        );
+
+        $this->assertStringContainsString('data-columns="2"', $html);
+        $this->assertStringContainsString('data-gap="spacious"', $html);
+        $this->assertStringContainsString('--cui-grid-min: 20rem', $html);
+        $this->assertStringContainsString('data-orient="row" data-variant="leadership"', $html);
+        $this->assertStringContainsString('<p class="cui-person-bio">Founder story.</p>', $html);
+    }
+
+    public function testEventsFrontend(): void
+    {
+        $html = BrickTwigEnvironment::render(
+            'cui-events',
+            false,
+            [
+                'variant' => 'featured',
+                'date' => '2026-06-15 10:00',
+                'title' => 'CSS workshop',
+                'category' => 'Workshop',
+                'time' => '10:00–12:00',
+                'location' => 'Amsterdam',
+                'status' => 'upcoming',
+                'excerpt' => 'Two hours of layout.',
+                'link' => ['href' => '/events/css', 'text' => 'Register'],
+            ],
+            ['events' => 1],
+        );
+
+        $this->assertStringContainsString('data-status="upcoming" data-variant="featured"', $html);
+        $this->assertStringContainsString('<time class="cui-event-card-date" datetime="2026-06-15T10:00">', $html);
+        $this->assertStringContainsString('<span class="cui-event-card-date-month">Jun</span>', $html);
+        $this->assertStringContainsString('<span class="cui-event-card-date-day">15</span>', $html);
+        $this->assertStringContainsString('<span class="cui-event-card-date-year">2026</span>', $html);
+        $this->assertStringContainsString('data-cui-event-title><a href="/events/css">CSS workshop</a>', $html);
+        $this->assertStringContainsString('<li>Amsterdam</li>', $html);
+        $this->assertStringContainsString('<span>Upcoming</span>', $html);
+        $this->assertStringContainsString('<a class="cui-button" data-variant="primary" href="/events/css">Register</a>', $html);
+    }
+
+    public function testEventsInvalidDateSkipsDateBlock(): void
+    {
+        $html = BrickTwigEnvironment::render(
+            'cui-events',
+            false,
+            ['date' => 'next friday', 'title' => 'Event'],
+            ['events' => 1],
+        );
+
+        $this->assertStringNotContainsString('cui-event-card-date', $html, 'an invalid date must be skipped, not crash the render');
+    }
+
+    public function testContactCardsFrontend(): void
+    {
+        $html = BrickTwigEnvironment::render(
+            'cui-contact',
+            false,
+            [
+                'variant' => 'inverse',
+                'eyebrow' => 'Support',
+                'title' => 'Customer success',
+                'text' => 'We reply within one business day.',
+                'email' => 'hello@example.com',
+                'phone' => '+31 20 123 4567',
+                'link' => ['href' => '/contact', 'text' => 'Send a message'],
+            ],
+            ['cards' => 1],
+        );
+
+        $this->assertStringContainsString('<article class="cui-surface cui-stack cui-contact-card" data-variant="inverse">', $html);
+        $this->assertStringContainsString('<dd><a href="mailto:hello@example.com">hello@example.com</a></dd>', $html);
+        $this->assertStringContainsString('<dd><a href="tel:+31201234567">+31 20 123 4567</a></dd>', $html);
+        $this->assertStringContainsString('<p>We reply within one business day.</p>', $html);
+        $this->assertStringContainsString('<a class="cui-button" data-variant="primary" href="/contact">Send a message</a>', $html);
+    }
+
+    public function testCardGridCategoryFilter(): void
+    {
+        $html = BrickTwigEnvironment::render(
+            'cui-card-grid',
+            false,
+            ['show_filter' => true, 'category' => 'News', 'title' => 'Card title'],
+            ['cards' => 2],
+        );
+
+        $this->assertStringContainsString('<cui-article-filter target="#cui-card-grid-0">', $html);
+        $this->assertStringContainsString('<p class="cui-article-filter-label">Filter</p>', $html);
+        $this->assertStringContainsString('<input type="radio" name="category" value="news">', $html);
+        $this->assertStringContainsString('<span>News</span>', $html);
+        $this->assertStringContainsString('id="cui-card-grid-0"', $html);
+        $this->assertStringContainsString('data-category="news"', $html);
+    }
+
+    public function testNewBricksEditmodeEditables(): void
+    {
+        $features = BrickTwigEnvironment::render('cui-feature-grid', true, [], ['features' => 1]);
+        $this->assertStringContainsString('<x-editable data-type="input" data-name="icon">', $features);
+
+        $team = BrickTwigEnvironment::render('cui-team', true, [], ['members' => 1]);
+        $this->assertStringContainsString('<x-editable data-type="image" data-name="photo">', $team);
+        $this->assertStringContainsString('<x-editable data-type="textarea" data-name="bio">', $team);
+
+        $events = BrickTwigEnvironment::render('cui-events', true, [], ['events' => 1]);
+        $this->assertStringContainsString('<x-editable data-type="select" data-name="status">', $events);
+        $this->assertStringContainsString('<x-editable data-type="link" data-name="link">', $events);
+
+        $contact = BrickTwigEnvironment::render('cui-contact', true, [], ['cards' => 1]);
+        $this->assertStringContainsString('<x-editable data-type="input" data-name="phone">', $contact);
+    }
+
     public function testEditmodeStacksInteractiveBricks(): void
     {
         $tabs = BrickTwigEnvironment::render('cui-tabs', true, [], ['tabs' => 2]);

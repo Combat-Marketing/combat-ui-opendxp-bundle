@@ -44,7 +44,8 @@ Load the Combat UI assets once in your document layout and expose an areablock f
             {{ opendxp_areablock('content', {
                 allowed: [
                     'cui-hero', 'cui-page-intro', 'cui-cta', 'cui-content', 'cui-card-grid',
-                    'cui-accordion', 'cui-tabs', 'cui-carousel', 'cui-media', 'cui-map',
+                    'cui-feature-grid', 'cui-stats', 'cui-logo-strip', 'cui-team', 'cui-events',
+                    'cui-contact', 'cui-accordion', 'cui-tabs', 'cui-carousel', 'cui-media', 'cui-map',
                 ]
             }) }}
         </main>
@@ -67,7 +68,13 @@ are configured through the brick dialog (pencil icon); content is edited inline 
 | Page intro | `cui-page-intro` | variant (landing/case/vacancy/campaign/full-bleed), tone, alignment, title tag, eyebrow, title, lead, meta lines | WYSIWYG body, primary/secondary links |
 | Call to action | `cui-cta` | variant (simple/split/full-bleed/sticky), tone, title tag, section spacing, eyebrow, title, lead | WYSIWYG body, primary/secondary links |
 | Rich text | `cui-content` | section spacing, tone, container width | WYSIWYG prose |
-| Card grid | `cui-card-grid` | columns, gap, card style (featured/compact/flat/borderless), section spacing, tone, container width | per card: image, category, title, excerpt, link |
+| Card grid | `cui-card-grid` | columns, gap, card style (featured/compact/flat/borderless), category filter chips + label, section spacing, tone, container width | per card: image, category, title, excerpt, link |
+| Feature grid | `cui-feature-grid` | columns, gap, alignment, section options | per feature: icon, title, copy |
+| Statistics | `cui-stats` | columns, gap, alignment, section options | per stat: value, label |
+| Logo strip | `cui-logo-strip` | section options | per logo: image, name fallback |
+| Team | `cui-team` | card style (flat/borderless/leadership), photo shape, alignment, columns, gap, section options | per member: photo, name, role, department, bio, email |
+| Events | `cui-events` | columns, card style (featured/compact), section options | per event: date, title, category, time, location, status, excerpt, link |
+| Contact cards | `cui-contact` | columns, card style (flat/borderless/inverse), alignment, section options | per card: eyebrow, title, copy, email, phone, link |
 | Accordion | `cui-accordion` | variant (ghost), open first item | per item: summary, WYSIWYG body |
 | Tabs | `cui-tabs` | — | per tab: label, WYSIWYG content |
 | Carousel | `cui-carousel` | autoplay, interval, transition, looping, arrows/pagination, width | per slide: image, caption |
@@ -76,6 +83,10 @@ are configured through the brick dialog (pencil icon); content is edited inline 
 
 ### Notes
 
+- The card/section bricks (card grid, feature grid, statistics, logo strip, team, events, contact,
+  media) render through the curated `@CombatUICore` component templates and therefore need a
+  `combat-ui/core-bundle` release that ships them (newer than 0.6.1.2). Until that release, the local
+  test suite runs against a sibling `combat-ui-bundle` checkout.
 - Brick auto-registration relies on OpenDXP's default `documents.areas.autoload: true`; if you disabled
   it, tag the brick classes with `opendxp.area.brick` yourself.
 - Image editables render the original asset by default. Override a brick template in your app

@@ -1,0 +1,71 @@
+{# Events brick — block of @CombatUICore event cards in a grid. #}
+{% set container = opendxp_select('container').getData()|default('') %}
+{% set section_props = {
+    spacing: opendxp_select('spacing').getData(),
+    tone: opendxp_select('tone').getData(),
+}|filter(value => value is not empty) %}
+{% if container != 'none' %}
+    {% set section_props = section_props|merge({container: container ?: 'default'}) %}
+{% endif %}
+
+{% set variant = opendxp_select('variant').getData()|default('') %}
+{% set grid_props = {
+    columns: opendxp_select('columns').getData(),
+    min: '22rem',
+}|filter(value => value is not empty) %}
+
+{% cui 'section' with section_props %}
+    {% cui 'grid' with grid_props %}
+        {% for i in opendxp_iterate_block(opendxp_block('events')) %}
+            {% if editmode %}
+                <div class="cui-surface cui-stack" style="padding: var(--cui-space-5, 1.5rem);">
+                    {{ opendxp_input('date', {placeholder: 'YYYY-MM-DD or YYYY-MM-DD HH:MM', width: 220}) }}
+                    {{ opendxp_input('title', {placeholder: 'Event title'}) }}
+                    {{ opendxp_input('category', {placeholder: 'Category (optional)'}) }}
+                    {{ opendxp_input('time', {placeholder: 'Time, e.g. 10:00–12:00 (optional)'}) }}
+                    {{ opendxp_input('location', {placeholder: 'Location (optional)'}) }}
+                    {{ opendxp_select('status', {store: [
+                        ['upcoming', 'Upcoming'],
+                        ['ongoing', 'Ongoing'],
+                        ['past', 'Past'],
+                        ['cancelled', 'Cancelled'],
+                    ], defaultValue: 'upcoming', width: 160}) }}
+                    {{ opendxp_textarea('excerpt', {placeholder: 'Short description (optional)'}) }}
+                    {{ opendxp_link('link') }}
+                </div>
+            {% else %}
+                {% set link = opendxp_link('link') %}
+                {% set status = opendxp_select('status').getData() %}
+                {% set date_value = opendxp_input('date').getData() %}
+                {% set event_props = {
+                    variant: variant,
+                    status: status,
+                    status_label: status ? status|capitalize : null,
+                    title: opendxp_input('title').getData(),
+                    href: link.isEmpty() ? null : link.getHref(),
+                    category: opendxp_input('category').getData(),
+                    excerpt: opendxp_textarea('excerpt').getData(),
+                }|filter(value => value is not empty) %}
+                {% if date_value and date_value matches '/^\\d{4}-\\d{2}-\\d{2}([T ]\\d{2}:\\d{2})?$/' %}
+                    {% set event_props = event_props|merge({
+                        datetime: date_value|replace({' ': 'T'}),
+                        month: date_value|date('M'),
+                        day: date_value|date('j'),
+                        year: date_value|date('Y'),
+                    }) %}
+                {% endif %}
+                {% set meta = [opendxp_input('time').getData(), opendxp_input('location').getData()]|filter(value => value is not empty) %}
+                {% if meta is not empty %}
+                    {% set event_props = event_props|merge({meta: meta}) %}
+                {% endif %}
+                {% cui 'event-card' with event_props %}
+                    {% if not link.isEmpty() and link.getText() %}
+                        {% cui_slot 'actions' %}
+                            <a class="cui-button" data-variant="primary" href="{{ link.getHref() }}"{% if link.getTarget() %} target="{{ link.getTarget() }}"{% endif %}>{{ link.getText() }}</a>
+                        {% endcui_slot %}
+                    {% endif %}
+                {% endcui %}
+            {% endif %}
+        {% endfor %}
+    {% endcui %}
+{% endcui %}

@@ -1,0 +1,28 @@
+{# Logo-strip brick — block of @CombatUICore logo items in a tight grid. #}
+{% set container = opendxp_select('container').getData()|default('') %}
+{% set section_props = {
+    spacing: opendxp_select('spacing').getData(),
+    tone: opendxp_select('tone').getData(),
+}|filter(value => value is not empty) %}
+{% if container != 'none' %}
+    {% set section_props = section_props|merge({container: container ?: 'default'}) %}
+{% endif %}
+
+{% cui 'section' with section_props %}
+    {% cui 'grid' with {min: '9rem'} %}
+        {% for i in opendxp_iterate_block(opendxp_block('logos')) %}
+            {% if editmode %}
+                <div class="cui-surface cui-stack" style="padding: var(--cui-space-4, 1rem);">
+                    {{ opendxp_image('logo') }}
+                    {{ opendxp_input('label', {placeholder: 'Name (fallback without image)'}) }}
+                </div>
+            {% else %}
+                {% set logo = opendxp_image('logo') %}
+                {% set label = opendxp_input('label').getData() %}
+                {% cui 'logo-item' with (label ? {label: label} : {}) %}
+                    {%- if not logo.isEmpty() -%}{{ logo|raw }}{%- endif -%}
+                {% endcui %}
+            {% endif %}
+        {% endfor %}
+    {% endcui %}
+{% endcui %}

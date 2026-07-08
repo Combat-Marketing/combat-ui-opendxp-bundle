@@ -39,6 +39,13 @@ final class BrickTwigEnvironment
     {
         $coreBundlePath = InstalledVersions::getInstallPath('combat-ui/core-bundle');
 
+        // Prefer a sibling checkout of the core bundle when it is ahead of the released
+        // package (identified by a template the release does not ship yet).
+        $sibling = \dirname(__DIR__, 4) . '/combat-ui-bundle';
+        if (is_file($sibling . '/templates/components/article-card.html.twig')) {
+            $coreBundlePath = $sibling;
+        }
+
         $loader = new FilesystemLoader();
         $loader->addPath($coreBundlePath . '/templates', 'CombatUICore');
         $loader->addPath(\dirname(__DIR__, 3) . '/templates', 'CombatUIOpenDxp');

@@ -1,0 +1,57 @@
+{# Team brick — block of @CombatUICore person cards; leadership style renders row cards with bios. #}
+{% set container = opendxp_select('container').getData()|default('') %}
+{% set section_props = {
+    spacing: opendxp_select('spacing').getData(),
+    tone: opendxp_select('tone').getData(),
+}|filter(value => value is not empty) %}
+{% if container != 'none' %}
+    {% set section_props = section_props|merge({container: container ?: 'default'}) %}
+{% endif %}
+
+{% set variant = opendxp_select('variant').getData()|default('') %}
+{% set leadership = variant == 'leadership' %}
+{% set align = opendxp_select('align').getData()|default('') %}
+{% set photo_shape = opendxp_select('photo_shape').getData()|default('') %}
+{% set grid_props = {
+    columns: opendxp_select('columns').getData()|default(leadership ? '2' : null),
+    gap: opendxp_select('gap').getData()|default(leadership ? 'spacious' : null),
+    min: leadership ? '20rem' : null,
+}|filter(value => value is not empty) %}
+
+{% cui 'section' with section_props %}
+    {% cui 'grid' with grid_props %}
+        {% for i in opendxp_iterate_block(opendxp_block('members')) %}
+            {% if editmode %}
+                <div class="cui-surface cui-stack" style="padding: var(--cui-space-5, 1.5rem);">
+                    {{ opendxp_image('photo') }}
+                    {{ opendxp_input('name', {placeholder: 'Name'}) }}
+                    {{ opendxp_input('role', {placeholder: 'Role'}) }}
+                    {{ opendxp_input('meta', {placeholder: 'Department / pronouns (optional)'}) }}
+                    {{ opendxp_textarea('bio', {placeholder: 'Short bio (leadership style)'}) }}
+                    {{ opendxp_input('email', {placeholder: 'Email (optional)'}) }}
+                </div>
+            {% else %}
+                {% set photo = opendxp_image('photo') %}
+                {% set email = opendxp_input('email').getData() %}
+                {% set member_props = {
+                    name: opendxp_input('name').getData(),
+                    role: opendxp_input('role').getData(),
+                    meta: opendxp_input('meta').getData(),
+                    bio: opendxp_textarea('bio').getData(),
+                    align: align,
+                    photo_shape: photo_shape,
+                    variant: variant,
+                    orient: leadership ? 'row' : null,
+                }|filter(value => value is not empty) %}
+                {% if not photo.isEmpty() %}
+                    {% set member_props = member_props|merge({photo: photo.getSrc(), photo_alt: photo.getAlt()}) %}
+                {% endif %}
+                {% cui 'person' with member_props %}
+                    {% if email %}
+                        {% cui_slot 'links' %}<li><a href="mailto:{{ email }}">{{ email }}</a></li>{% endcui_slot %}
+                    {% endif %}
+                {% endcui %}
+            {% endif %}
+        {% endfor %}
+    {% endcui %}
+{% endcui %}
