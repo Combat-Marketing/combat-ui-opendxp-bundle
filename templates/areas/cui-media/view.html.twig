@@ -19,11 +19,15 @@
 {% set full_width = width == 'none' %}
 {% set section_props = full_width ? {} : {container: width ?: 'default'} %}
 
+{# Frontend media output only — in editmode the editables are rendered directly below, so keep
+   this capture out of editmode to avoid rendering the same editable into a throwaway buffer. #}
 {% set media %}
-    {%- if not video.isEmpty() -%}
-        {{- video|raw -}}
-    {%- elseif not image.isEmpty() -%}
-        {{- image|raw -}}
+    {%- if not editmode -%}
+        {%- if not video.isEmpty() -%}
+            {{- video|raw -}}
+        {%- elseif not image.isEmpty() -%}
+            {{- image|raw -}}
+        {%- endif -%}
     {%- endif -%}
 {% endset %}
 {% set has_media = media|trim is not empty %}
@@ -35,11 +39,9 @@
 {% cui 'section' with section_props %}
     {% if editmode %}
         <div class="cui-stack">
-            {%- if not video.isEmpty() -%}
-                {{- video|raw -}}
-            {%- else -%}
-                {{- image|raw -}}
-            {%- endif -%}
+            {# Offer both editables so an author can assign either — the frontend prefers the video. #}
+            {{ image|raw }}
+            {{ video|raw }}
             {% if style == 'figure' %}
                 {{ caption_editable|raw }}
             {% endif %}

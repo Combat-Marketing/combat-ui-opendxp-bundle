@@ -400,9 +400,11 @@ final class BrickTemplateRenderingTest extends Unit
         $this->assertStringContainsString('<x-editable data-type="input" data-name="caption">', $figure);
         $this->assertStringNotContainsString('data-name="body"', $figure, 'figure style has no body copy');
 
+        $this->assertStringContainsString('<x-editable data-type="video" data-name="video">', $figure, 'editmode always offers the video editable so a video can be assigned');
+
         $video = BrickTwigEnvironment::render('cui-media', true, ['video' => '/media/clip.mp4']);
         $this->assertStringContainsString('<x-editable data-type="video" data-name="video">', $video);
-        $this->assertStringNotContainsString('<x-editable data-type="image" data-name="image">', $video, 'selected video replaces the image editable');
+        $this->assertStringContainsString('<x-editable data-type="image" data-name="image">', $video, 'both media editables stay available in editmode');
 
         $card = BrickTwigEnvironment::render('cui-media', true, ['style' => 'card']);
         $this->assertStringContainsString('<x-editable data-type="wysiwyg" data-name="body">', $card);
