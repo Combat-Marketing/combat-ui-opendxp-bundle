@@ -18,29 +18,82 @@ use OpenDxp\Extension\Document\Areabrick\EditableDialogBoxConfiguration;
 use OpenDxp\Extension\Document\Areabrick\EditableDialogBoxInterface;
 use OpenDxp\Model\Document\Editable;
 use OpenDxp\Model\Document\Editable\Area\Info;
+use OpenDxp\Model\Document\Editable\Link;
+use OpenDxp\Model\Document\Editable\Video;
 
 #[AsAreabrick(id: 'cui-media')]
 class Media extends AbstractCuiAreabrick implements EditableDialogBoxInterface
 {
     public function getName(): string
     {
-        return 'Image';
+        return 'Media';
     }
 
     public function getDescription(): string
     {
-        return 'Single image with an optional caption.';
+        return 'Media block: figure with caption, full-width media, media card or overlay card.';
     }
 
     public function getEditableDialogBoxConfiguration(Editable $area, ?Info $info): EditableDialogBoxConfiguration
     {
         return $this->dialog([
-            $this->selectField('width', 'Width', [
-                ['', 'Default container'],
-                ['narrow', 'Narrow container'],
-                ['wide', 'Wide container'],
-                ['none', 'Full width'],
+            $this->tabs([
+                'Media' => [
+                    $this->selectField('style', 'Style', [
+                        ['', 'Figure with caption'],
+                        ['full', 'Full-width media'],
+                        ['banner', 'Banner (linked image)'],
+                        ['card', 'Media card'],
+                        ['overlay', 'Overlay card'],
+                    ]),
+                    $this->selectField('ratio', 'Aspect ratio', [
+                        ['', 'Default (16:9)'],
+                        ['square', 'Square'],
+                        ['portrait', 'Portrait'],
+                        ['wide', 'Wide'],
+                        ['auto', 'Intrinsic (auto)'],
+                    ]),
+                    (new Video())
+                        ->setName('video')
+                        ->setLabel('Video')
+                        ->setDialogDescription('Used as the media instead of the image when set.'),
+                    (new Link())
+                        ->setName('banner_link')
+                        ->setLabel('Media link')
+                        ->setDialogDescription('Banner style: the whole image links to this target. Card style: the media region links to this target. The link text becomes the accessible label.'),
+                ],
+                'Content' => [
+                    $this->inputField('eyebrow', 'Eyebrow', 'Card and overlay styles.'),
+                    $this->inputField('title', 'Title', 'Card and overlay styles.'),
+                ],
+                'Layout' => [
+                    $this->selectField('width', 'Width', [
+                        ['', 'Default container'],
+                        ['narrow', 'Narrow container'],
+                        ['wide', 'Wide container'],
+                        ['none', 'Full width'],
+                    ]),
+                    $this->selectField('align', 'Alignment', [
+                        ['', 'Default'],
+                        ['center', 'Center (figure and overlay styles)'],
+                        ['end', 'End (overlay style)'],
+                    ]),
+                    $this->checkboxField('orient_row', 'Media beside body (card style)'),
+                    $this->checkboxField('reverse', 'Reverse order: content before media (card style)'),
+                    $this->selectField('card_style', 'Card chrome (card style)', [
+                        ['', 'Default'],
+                        ['flat', 'Flat (no shadow)'],
+                        ['borderless', 'Borderless'],
+                    ]),
+                    $this->selectField('scrim', 'Scrim (overlay style)', [
+                        ['', 'Bottom gradient'],
+                        ['solid', 'Solid'],
+                        ['top', 'Top gradient'],
+                        ['none', 'None'],
+                    ]),
+                    $this->checkboxField('no_radius', 'Remove rounded corners (full-width style)'),
+                ],
             ]),
-        ], 280);
+        ], 560);
     }
 }

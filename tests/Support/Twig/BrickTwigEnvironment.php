@@ -19,7 +19,7 @@ use Twig\TwigFunction;
  */
 final class BrickTwigEnvironment
 {
-    private const EDITABLE_TYPES = ['input', 'textarea', 'wysiwyg', 'select', 'checkbox', 'numeric', 'image', 'link'];
+    private const EDITABLE_TYPES = ['input', 'textarea', 'wysiwyg', 'select', 'checkbox', 'numeric', 'image', 'link', 'video'];
 
     /**
      * @param array<string, mixed> $data   editable name => data

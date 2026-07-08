@@ -71,7 +71,7 @@ are configured through the brick dialog (pencil icon); content is edited inline 
 | Accordion | `cui-accordion` | variant (ghost), open first item | per item: summary, WYSIWYG body |
 | Tabs | `cui-tabs` | — | per tab: label, WYSIWYG content |
 | Carousel | `cui-carousel` | autoplay, interval, transition, looping, arrows/pagination, width | per slide: image, caption |
-| Image | `cui-media` | container width | image, caption |
+| Media | `cui-media` | style (figure / full-width / banner / media card / overlay card), aspect ratio, optional video, media link (banner: whole image, card: media region), eyebrow, title, container width, alignment, row orientation, reversed order (content before media), card chrome (flat/borderless), scrim, corner radius | image; caption (figure); WYSIWYG body + links (card/overlay) |
 | Map | `cui-map` | center, zoom, clustering, fit bounds, scroll-wheel zoom | per marker: label, latitude, longitude |
 
 ### Notes

@@ -215,26 +215,200 @@ final class BrickTemplateRenderingTest extends Unit
         $this->assertStringContainsString('<figcaption>A caption</figcaption>', $html);
     }
 
-    public function testMediaFrontend(): void
+    public function testMediaFigureFrontend(): void
     {
         $html = BrickTwigEnvironment::render('cui-media', false, [
             'width' => 'narrow',
+            'ratio' => 'wide',
+            'align' => 'center',
             'image' => '/media/photo.jpg',
             'caption' => 'Shot on location',
         ]);
 
         $this->assertStringContainsString('class="cui-container-narrow"', $html);
-        $this->assertStringContainsString('<img src="/media/photo.jpg" alt="">', $html);
+        $this->assertStringContainsString('class="cui-figure"', $html);
+        $this->assertStringContainsString('data-ratio="wide"', $html);
+        $this->assertStringContainsString('data-align="center"', $html);
+        $this->assertStringContainsString('<div class="cui-figure-media"><img src="/media/photo.jpg" alt=""></div>', $html);
         $this->assertStringContainsString('<figcaption>Shot on location</figcaption>', $html);
     }
 
-    public function testMediaFrontendWithoutCaptionOmitsFigcaption(): void
+    public function testMediaFigureWithoutCaptionOmitsFigcaption(): void
     {
         $html = BrickTwigEnvironment::render('cui-media', false, [
             'image' => '/media/photo.jpg',
         ]);
 
+        $this->assertStringContainsString('class="cui-figure"', $html);
         $this->assertStringNotContainsString('<figcaption>', $html);
+    }
+
+    public function testMediaWithoutAnyMediaRendersNoBlock(): void
+    {
+        $html = BrickTwigEnvironment::render('cui-media', false, [
+            'caption' => 'Orphan caption',
+        ]);
+
+        $this->assertStringNotContainsString('cui-figure', $html);
+        $this->assertStringNotContainsString('Orphan caption', $html);
+    }
+
+    public function testMediaFullBleedFrontendPrefersVideo(): void
+    {
+        $html = BrickTwigEnvironment::render('cui-media', false, [
+            'style' => 'full',
+            'width' => 'none',
+            'no_radius' => true,
+            'image' => '/media/poster.jpg',
+            'video' => '/media/clip.mp4',
+        ]);
+
+        $this->assertStringContainsString('class="cui-media-full"', $html);
+        $this->assertStringContainsString('data-bleed="full"', $html);
+        $this->assertStringContainsString('data-radius="none"', $html);
+        $this->assertStringContainsString('<video src="/media/clip.mp4"></video>', $html);
+        $this->assertStringNotContainsString('<img', $html, 'video takes precedence over the image');
+        $this->assertStringNotContainsString('cui-container', $html, 'full width drops the container');
+    }
+
+    public function testMediaBannerFrontendWrapsMediaInLink(): void
+    {
+        $html = BrickTwigEnvironment::render('cui-media', false, [
+            'style' => 'banner',
+            'ratio' => 'wide',
+            'image' => '/media/promo.jpg',
+            'banner_link' => ['href' => '/promo', 'text' => 'Summer promo', 'target' => '_blank'],
+        ]);
+
+        $this->assertMatchesRegularExpression(
+            '~<a href="/promo" target="_blank" aria-label="Summer promo">\s*<div class="cui-media-full" data-ratio="wide">~',
+            $html,
+            'the link must surround the media block',
+        );
+        $this->assertMatchesRegularExpression('~</div>\s*</a>~', $html);
+        $this->assertStringContainsString('<img src="/media/promo.jpg" alt="">', $html);
+    }
+
+    public function testMediaBannerWithoutLinkFallsBackToPlainBlock(): void
+    {
+        $html = BrickTwigEnvironment::render('cui-media', false, [
+            'style' => 'banner',
+            'image' => '/media/promo.jpg',
+        ]);
+
+        $this->assertStringContainsString('class="cui-media-full"', $html);
+        $this->assertStringNotContainsString('<a ', $html);
+    }
+
+    public function testMediaCardFrontend(): void
+    {
+        $html = BrickTwigEnvironment::render('cui-media', false, [
+            'style' => 'card',
+            'orient_row' => true,
+            'card_style' => 'flat',
+            'image' => '/media/cover.jpg',
+            'eyebrow' => 'Spotlight',
+            'title' => 'Card title',
+            'body' => '<p>Card copy</p>',
+            'link_primary' => ['href' => '/post', 'text' => 'Read more'],
+        ]);
+
+        $this->assertStringContainsString('<article class="cui-surface cui-media-card" data-orient="row" data-elevation="flat">', $html);
+        $this->assertStringContainsString('<div class="cui-media-card-media"><img src="/media/cover.jpg" alt=""></div>', $html);
+        $this->assertStringContainsString('<p class="cui-eyebrow">Spotlight</p>', $html);
+        $this->assertStringContainsString('<h3>Card title</h3>', $html);
+        $this->assertStringContainsString('<p>Card copy</p>', $html);
+        $this->assertStringContainsString('<a class="cui-button" data-variant="primary" href="/post">Read more</a>', $html);
+        $this->assertLessThan(
+            strpos($html, '<div class="cui-stack">'),
+            strpos($html, 'cui-media-card-media'),
+            'media leads the card by default',
+        );
+    }
+
+    public function testMediaCardReverseRendersContentBeforeMedia(): void
+    {
+        $html = BrickTwigEnvironment::render('cui-media', false, [
+            'style' => 'card',
+            'reverse' => true,
+            'image' => '/media/cover.jpg',
+            'title' => 'Card title',
+        ]);
+
+        $this->assertStringContainsString('<div class="cui-media-card-media">', $html);
+        $this->assertGreaterThan(
+            strpos($html, '<div class="cui-stack">'),
+            strpos($html, 'cui-media-card-media'),
+            'reversed card puts the body before the media',
+        );
+    }
+
+    public function testMediaCardWithMediaLinkWrapsMediaRegionInAnchor(): void
+    {
+        $html = BrickTwigEnvironment::render('cui-media', false, [
+            'style' => 'card',
+            'image' => '/media/cover.jpg',
+            'title' => 'Card title',
+            'banner_link' => ['href' => '/case-study', 'text' => 'Read the case study'],
+        ]);
+
+        $this->assertStringContainsString(
+            '<a class="cui-media-card-media" href="/case-study" aria-label="Read the case study"><img src="/media/cover.jpg" alt=""></a>',
+            $html,
+        );
+        $this->assertStringNotContainsString('<div class="cui-media-card-media">', $html);
+    }
+
+    public function testMediaCardBorderlessMapsToDataVariant(): void
+    {
+        $html = BrickTwigEnvironment::render('cui-media', false, [
+            'style' => 'card',
+            'card_style' => 'borderless',
+            'image' => '/media/cover.jpg',
+        ]);
+
+        $this->assertStringContainsString('data-variant="borderless"', $html);
+        $this->assertStringNotContainsString('data-elevation=', $html);
+    }
+
+    public function testMediaOverlayFrontend(): void
+    {
+        $html = BrickTwigEnvironment::render('cui-media', false, [
+            'style' => 'overlay',
+            'align' => 'center',
+            'scrim' => 'solid',
+            'ratio' => 'wide',
+            'image' => '/media/campaign.jpg',
+            'eyebrow' => 'Campaign',
+            'title' => 'Above the fold',
+            'body' => '<p>Overlay copy</p>',
+        ]);
+
+        $this->assertStringContainsString('class="cui-media-overlay"', $html);
+        $this->assertStringContainsString('data-align="center"', $html);
+        $this->assertStringContainsString('data-scrim="solid"', $html);
+        $this->assertStringContainsString('data-ratio="wide"', $html);
+        $this->assertStringContainsString('<div class="cui-media-overlay-media"><img src="/media/campaign.jpg" alt=""></div>', $html);
+        $this->assertStringContainsString('<h3 class="cui-display">Above the fold</h3>', $html);
+        $this->assertStringContainsString('<p>Overlay copy</p>', $html);
+    }
+
+    public function testMediaEditmodeShowsStyleSpecificEditables(): void
+    {
+        $figure = BrickTwigEnvironment::render('cui-media', true);
+        $this->assertStringContainsString('<x-editable data-type="image" data-name="image">', $figure);
+        $this->assertStringContainsString('<x-editable data-type="input" data-name="caption">', $figure);
+        $this->assertStringNotContainsString('data-name="body"', $figure, 'figure style has no body copy');
+
+        $card = BrickTwigEnvironment::render('cui-media', true, ['style' => 'card']);
+        $this->assertStringContainsString('<x-editable data-type="wysiwyg" data-name="body">', $card);
+        $this->assertStringContainsString('<x-editable data-type="link" data-name="link_primary">', $card);
+        $this->assertStringContainsString('<x-editable data-type="link" data-name="banner_link">', $card, 'card style offers the media link');
+        $this->assertStringNotContainsString('data-name="caption"', $card, 'card style has no figure caption');
+
+        $banner = BrickTwigEnvironment::render('cui-media', true, ['style' => 'banner']);
+        $this->assertStringContainsString('<x-editable data-type="link" data-name="banner_link">', $banner);
+        $this->assertStringNotContainsString('data-name="body"', $banner, 'banner style has no body copy');
     }
 
     public function testMapFrontendRendersPoints(): void

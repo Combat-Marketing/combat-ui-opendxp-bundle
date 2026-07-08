@@ -63,6 +63,7 @@ final class FakeEditable implements \Stringable
 
         return match ($this->type) {
             'image' => $this->isEmpty() ? '' : sprintf('<img src="%s" alt="">', $this->getSrc()),
+            'video' => $this->isEmpty() ? '' : sprintf('<video src="%s"></video>', $this->getSrc()),
             'wysiwyg' => is_string($this->data) ? $this->data : '',
             'link' => $this->isEmpty() ? '' : sprintf('<a href="%s">%s</a>', $this->getHref(), $this->getText()),
             default => is_scalar($this->data) ? htmlspecialchars((string) $this->data) : '',
