@@ -21,7 +21,9 @@ use Symfony\Component\Routing\Attribute\Route;
 
 /**
  * Serves the generated token-override stylesheet. `cui_theme_tokens()` links it with the current
- * override hash as `?v=`, so a matching request may be cached immutably for a year; any other
+ * override hash as `?ver=` (`v` is reserved by OpenDXP's public document-version preview and its
+ * ElementListener rejects non-integer values), so a matching request may be cached immutably for a
+ * year; any other
  * request revalidates via ETag.
  */
 final class ThemeCssController
@@ -42,7 +44,7 @@ final class ThemeCssController
         $response->setEtag(md5($css));
 
         $hash = $this->settings->getVersionHash();
-        if ($hash !== null && $request->query->getString('v') === $hash) {
+        if ($hash !== null && $request->query->getString('ver') === $hash) {
             $response->setMaxAge(31536000);
             $response->setImmutable();
         } else {

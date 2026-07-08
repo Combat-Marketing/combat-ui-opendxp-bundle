@@ -45,7 +45,7 @@ final class ThemeExtension extends AbstractExtension
             return '';
         }
 
-        $url = $this->urlGenerator->generate('combat_ui_theme_css', ['v' => $hash]);
+        $url = $this->urlGenerator->generate('combat_ui_theme_css', ['ver' => $hash]);
 
         return sprintf('<link rel="stylesheet" href="%s">', htmlspecialchars($url, ENT_QUOTES));
     }
