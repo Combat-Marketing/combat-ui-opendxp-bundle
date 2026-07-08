@@ -35,7 +35,11 @@
 {% cui 'section' with section_props %}
     {% if editmode %}
         <div class="cui-stack">
-            {{ image|raw }}
+            {% if has_media %}
+                {{ media|raw }}
+            {% else %}
+                {{ image|raw }}
+            {% endif %}
             {% if style == 'figure' %}
                 {{ caption_editable|raw }}
             {% endif %}
