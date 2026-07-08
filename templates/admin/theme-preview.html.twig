@@ -1,0 +1,134 @@
+{# Kitchen-sink sample page for the theme editor's preview iframe. The editor injects a <style>
+   element mirroring ThemeCssGenerator's output with the current field values and toggles
+   data-theme on the root element, so every token edit is visible without saving. #}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Combat UI theme preview</title>
+    {{ cui_assets() }}
+</head>
+<body>
+    <section class="cui-hero" data-variant="text">
+        <div class="cui-hero-inner">
+            <div class="cui-stack">
+                <p class="cui-eyebrow">Theme preview</p>
+                <h1 class="cui-display">Every token edit, visible immediately.</h1>
+                <p>This sample page renders the framework blocks with your current overrides applied. Adjust a token on the left and watch it update here.</p>
+                <div class="cui-cluster">
+                    <cui-button variant="primary">Primary action</cui-button>
+                    <cui-button>Secondary</cui-button>
+                    <cui-button disabled>Disabled</cui-button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cui-section">
+        <div class="cui-container cui-stack">
+            <div class="cui-prose">
+                <h2>Typography</h2>
+                <p>
+                    Body copy uses the base font tokens. <a href="#">Inline links</a> pick up the link color,
+                    <strong>strong text</strong> and <em>emphasis</em> follow the text color, and
+                    <code>inline code</code> uses the mono font stack.
+                </p>
+                <ul>
+                    <li>Unordered list item one</li>
+                    <li>Unordered list item two</li>
+                </ul>
+                <blockquote>Blockquotes inherit the muted text treatment and surface accents.</blockquote>
+            </div>
+        </div>
+    </section>
+
+    <section class="cui-section">
+        <div class="cui-container cui-stack">
+            <div class="cui-prose">
+                <h2>Cards</h2>
+            </div>
+            <div class="cui-grid" data-columns="3" style="--cui-grid-min: 14rem;">
+                {% for card in [
+                    { eyebrow: 'Category', title: 'Card title one', excerpt: 'Surfaces, radii, and shadows come from the surface tokens.' },
+                    { eyebrow: 'Category', title: 'Card title two', excerpt: 'Headings and links inside cards follow the color tokens.' },
+                    { eyebrow: 'Category', title: 'Card title three', excerpt: 'Grid gaps and padding respond to the spacing tokens.' },
+                ] %}
+                    <article class="cui-surface cui-article-card">
+                        <div class="cui-stack">
+                            <p class="cui-eyebrow">{{ card.eyebrow }}</p>
+                            <h3 class="cui-display"><a href="#">{{ card.title }}</a></h3>
+                            <p>{{ card.excerpt }}</p>
+                            <ul class="cui-meta">
+                                <li><time datetime="2026-07-01">July 1, 2026</time></li>
+                            </ul>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <section class="cui-section">
+        <div class="cui-container cui-stack">
+            <div class="cui-prose">
+                <h2>Stats</h2>
+            </div>
+            <div class="cui-grid" data-columns="3" style="--cui-grid-min: 10rem;">
+                {% for stat in [
+                    { value: '42%', label: 'Higher page reuse' },
+                    { value: '18', label: 'Reusable sections' },
+                    { value: '3×', label: 'Faster publishing' },
+                ] %}
+                    <div class="cui-surface cui-stat" data-align="center">
+                        <span class="cui-stat-value">{{ stat.value }}</span>
+                        <span class="cui-stat-label">{{ stat.label }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <section class="cui-section">
+        <div class="cui-container cui-stack">
+            <div class="cui-prose">
+                <h2>Form controls</h2>
+            </div>
+            <div class="cui-surface" style="max-inline-size: 32rem;">
+                <form class="cui-stack" onsubmit="return false;">
+                    <cui-field required>
+                        <label for="preview-email">Email</label>
+                        <input class="cui-input" type="email" name="email" id="preview-email" autocomplete="off">
+                    </cui-field>
+                    <cui-field>
+                        <label for="preview-topic">Topic</label>
+                        <select class="cui-input" name="topic" id="preview-topic">
+                            <option>General</option>
+                            <option>Support</option>
+                        </select>
+                    </cui-field>
+                    <cui-field>
+                        <label for="preview-message">Message</label>
+                        <textarea class="cui-input" name="message" id="preview-message" rows="3"></textarea>
+                    </cui-field>
+                    <div class="cui-cluster">
+                        <cui-button variant="primary" type="submit">Submit</cui-button>
+                        <cui-button type="reset">Reset</cui-button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <section class="cui-cta cui-surface cui-stack" data-variant="simple">
+        <div class="cui-cta-content cui-stack">
+            <p class="cui-eyebrow">Call to action</p>
+            <h2 class="cui-cta-title">Conversion sections pick up surface and control tokens.</h2>
+            <div class="cui-cluster">
+                <cui-button variant="primary">Get started</cui-button>
+                <cui-button>Learn more</cui-button>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

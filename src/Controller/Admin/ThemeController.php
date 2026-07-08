@@ -53,6 +53,21 @@ class ThemeController extends UserAwareController
         ]);
     }
 
+    #[Route('/preview', name: 'combat_ui_admin_theme_preview', methods: ['GET'])]
+    public function previewAction(): Response
+    {
+        $this->checkPermission(self::PERMISSION);
+
+        // Sample page shown in the theme editor's preview iframe. The editor injects a <style>
+        // element with the current (unsaved) field values, so the saved override stylesheet is
+        // deliberately not linked here.
+        $response = $this->render('@CombatUIOpenDxp/admin/theme-preview.html.twig');
+        $response->setPrivate();
+        $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
+
+        return $response;
+    }
+
     #[Route('/save', name: 'combat_ui_admin_theme_save', methods: ['PUT', 'POST'])]
     public function saveAction(Request $request): JsonResponse
     {
