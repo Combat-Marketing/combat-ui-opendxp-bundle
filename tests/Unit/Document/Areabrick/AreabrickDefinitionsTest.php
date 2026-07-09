@@ -44,7 +44,7 @@ final class AreabrickDefinitionsTest extends Unit
             'accordion' => [Accordion::class, 'cui-accordion', ['variant', 'open_first']],
             'tabs' => [Tabs::class, 'cui-tabs', []],
             'carousel' => [Carousel::class, 'cui-carousel', ['autoplay', 'interval', 'transition', 'no_loop', 'hide_controls', 'hide_pagination', 'width']],
-            'media' => [Media::class, 'cui-media', ['style', 'ratio', 'video', 'banner_link', 'eyebrow', 'title', 'width', 'align', 'orient_row', 'reverse', 'card_style', 'scrim', 'no_radius']],
+            'media' => [Media::class, 'cui-media', ['style', 'ratio', 'media_type', 'width', 'align', 'orient_row', 'reverse', 'card_style', 'scrim', 'no_radius']],
             'map' => [Map::class, 'cui-map', ['center', 'zoom', 'cluster', 'fit_bounds', 'scroll_wheel_zoom']],
             'feature grid' => [FeatureGrid::class, 'cui-feature-grid', ['columns', 'gap', 'align', 'spacing', 'tone', 'container']],
             'statistics' => [Stats::class, 'cui-stats', ['columns', 'gap', 'align', 'spacing', 'tone', 'container']],

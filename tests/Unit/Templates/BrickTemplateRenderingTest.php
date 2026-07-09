@@ -253,12 +253,13 @@ final class BrickTemplateRenderingTest extends Unit
         $this->assertStringNotContainsString('Orphan caption', $html);
     }
 
-    public function testMediaFullBleedFrontendPrefersVideo(): void
+    public function testMediaFullBleedFrontendUsesVideoWhenSelected(): void
     {
         $html = BrickTwigEnvironment::render('cui-media', false, [
             'style' => 'full',
             'width' => 'none',
             'no_radius' => true,
+            'media_type' => 'video',
             'image' => '/media/poster.jpg',
             'video' => '/media/clip.mp4',
         ]);
@@ -267,8 +268,20 @@ final class BrickTemplateRenderingTest extends Unit
         $this->assertStringContainsString('data-bleed="full"', $html);
         $this->assertStringContainsString('data-radius="none"', $html);
         $this->assertStringContainsString('<video src="/media/clip.mp4"></video>', $html);
-        $this->assertStringNotContainsString('<img', $html, 'video takes precedence over the image');
+        $this->assertStringNotContainsString('<img', $html, 'the video media type replaces the image');
         $this->assertStringNotContainsString('cui-container', $html, 'full width drops the container');
+    }
+
+    public function testMediaKeepsImageWhenVideoSetButTypeIsImage(): void
+    {
+        $html = BrickTwigEnvironment::render('cui-media', false, [
+            'style' => 'full',
+            'image' => '/media/poster.jpg',
+            'video' => '/media/clip.mp4',
+        ]);
+
+        $this->assertStringContainsString('<img src="/media/poster.jpg" alt="">', $html);
+        $this->assertStringNotContainsString('<video', $html, 'a set video is ignored unless the media type is video');
     }
 
     public function testMediaBannerFrontendWrapsMediaInLink(): void
@@ -399,14 +412,15 @@ final class BrickTemplateRenderingTest extends Unit
         $this->assertStringContainsString('<x-editable data-type="image" data-name="image">', $figure);
         $this->assertStringContainsString('<x-editable data-type="input" data-name="caption">', $figure);
         $this->assertStringNotContainsString('data-name="body"', $figure, 'figure style has no body copy');
+        $this->assertStringNotContainsString('<x-editable data-type="video" data-name="video">', $figure, 'the image media type edits the image inline');
 
-        $this->assertStringContainsString('<x-editable data-type="video" data-name="video">', $figure, 'editmode always offers the video editable so a video can be assigned');
-
-        $video = BrickTwigEnvironment::render('cui-media', true, ['video' => '/media/clip.mp4']);
+        $video = BrickTwigEnvironment::render('cui-media', true, ['media_type' => 'video']);
         $this->assertStringContainsString('<x-editable data-type="video" data-name="video">', $video);
-        $this->assertStringContainsString('<x-editable data-type="image" data-name="image">', $video, 'both media editables stay available in editmode');
+        $this->assertStringNotContainsString('<x-editable data-type="image" data-name="image">', $video, 'the video media type replaces the image editable inline');
 
         $card = BrickTwigEnvironment::render('cui-media', true, ['style' => 'card']);
+        $this->assertStringContainsString('<x-editable data-type="input" data-name="eyebrow">', $card, 'card content is edited inline');
+        $this->assertStringContainsString('<x-editable data-type="input" data-name="title">', $card, 'card content is edited inline');
         $this->assertStringContainsString('<x-editable data-type="wysiwyg" data-name="body">', $card);
         $this->assertStringContainsString('<x-editable data-type="link" data-name="link_primary">', $card);
         $this->assertStringContainsString('<x-editable data-type="link" data-name="banner_link">', $card, 'card style offers the media link');

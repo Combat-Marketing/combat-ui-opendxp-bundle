@@ -18,8 +18,6 @@ use OpenDxp\Extension\Document\Areabrick\EditableDialogBoxConfiguration;
 use OpenDxp\Extension\Document\Areabrick\EditableDialogBoxInterface;
 use OpenDxp\Model\Document\Editable;
 use OpenDxp\Model\Document\Editable\Area\Info;
-use OpenDxp\Model\Document\Editable\Link;
-use OpenDxp\Model\Document\Editable\Video;
 
 #[AsAreabrick(id: 'cui-media')]
 class Media extends AbstractCuiAreabrick implements EditableDialogBoxInterface
@@ -53,18 +51,10 @@ class Media extends AbstractCuiAreabrick implements EditableDialogBoxInterface
                         ['wide', 'Wide'],
                         ['auto', 'Intrinsic (auto)'],
                     ]),
-                    (new Video())
-                        ->setName('video')
-                        ->setLabel('Video')
-                        ->setDialogDescription('Used as the media instead of the image when set.'),
-                    (new Link())
-                        ->setName('banner_link')
-                        ->setLabel('Media link')
-                        ->setDialogDescription('Banner style: the whole image links to this target. Card style: the media region links to this target. The link text becomes the accessible label.'),
-                ],
-                'Content' => [
-                    $this->inputField('eyebrow', 'Eyebrow', 'Card and overlay styles.'),
-                    $this->inputField('title', 'Title', 'Card and overlay styles.'),
+                    $this->selectField('media_type', 'Media type', [
+                        ['', 'Image'],
+                        ['video', 'Video'],
+                    ], 'Choose whether this block shows an image or a video. The chosen media is edited inline on the page.'),
                 ],
                 'Layout' => [
                     $this->selectField('width', 'Width', [

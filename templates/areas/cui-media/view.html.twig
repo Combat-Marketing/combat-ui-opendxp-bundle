@@ -1,20 +1,27 @@
 {#
     Media brick — the four Combat UI media blocks plus a linked banner:
     figure, full-width, banner, media card and overlay card. The frontend
-    delegates to the @CombatUICore media templates; the dialog picks the
-    style and its modifiers; image, caption, body copy and actions are
-    edited inline.
+    delegates to the @CombatUICore media templates.
+
+    Editing split: the dialog holds settings only (style, aspect ratio,
+    media type and layout); all content — the chosen media (image or video),
+    caption, eyebrow, title, body copy, media link and actions — is edited
+    inline on the page.
 #}
 {% set style = opendxp_select('style').getData()|default('') %}
 {% set style = style ?: 'figure' %}
 {% set ratio = opendxp_select('ratio').getData()|default(null) %}
 {% set width = opendxp_select('width').getData()|default('') %}
 {% set align = opendxp_select('align').getData()|default('') %}
+{% set media_type = opendxp_select('media_type').getData()|default('') %}
+{% set use_video = media_type == 'video' %}
 {% set image = opendxp_image('image') %}
 {% set video = opendxp_video('video') %}
 {% set caption_editable = opendxp_input('caption', {placeholder: 'Caption (optional)'}) %}
-{% set eyebrow = opendxp_input('eyebrow').getData() %}
-{% set title = opendxp_input('title').getData() %}
+{% set eyebrow_editable = opendxp_input('eyebrow', {placeholder: 'Eyebrow (optional)'}) %}
+{% set title_editable = opendxp_input('title', {placeholder: 'Title'}) %}
+{% set eyebrow = eyebrow_editable.getData() %}
+{% set title = title_editable.getData() %}
 
 {% set full_width = width == 'none' %}
 {% set section_props = full_width ? {} : {container: width ?: 'default'} %}
@@ -23,7 +30,7 @@
    this capture out of editmode to avoid rendering the same editable into a throwaway buffer. #}
 {% set media %}
     {%- if not editmode -%}
-        {%- if not video.isEmpty() -%}
+        {%- if use_video and not video.isEmpty() -%}
             {{- video|raw -}}
         {%- elseif not image.isEmpty() -%}
             {{- image|raw -}}
@@ -39,9 +46,12 @@
 {% cui 'section' with section_props %}
     {% if editmode %}
         <div class="cui-stack">
-            {# Offer both editables so an author can assign either — the frontend prefers the video. #}
-            Image: {{ image|raw }}
-            Video: {{ video|raw }}
+            {# The dialog's "Media type" select decides which media editable is edited inline. #}
+            {%- if use_video -%}
+                {{- video|raw -}}
+            {%- else -%}
+                {{- image|raw -}}
+            {%- endif -%}
             {% if style == 'figure' %}
                 {{ caption_editable|raw }}
             {% endif %}
@@ -49,6 +59,8 @@
                 {{ opendxp_link('banner_link') }}
             {% endif %}
             {% if has_body %}
+                {{ eyebrow_editable|raw }}
+                {{ title_editable|raw }}
                 {{ opendxp_wysiwyg('body') }}
                 <div class="cui-cluster">
                     {% include '@CombatUIOpenDxp/areas/_partials/actions.html.twig' %}
@@ -80,7 +92,7 @@
     {% elseif style == 'card' %}
         {% set card_style = opendxp_select('card_style').getData()|default('') %}
         {% set banner_link = opendxp_link('banner_link') %}
-        {% set linked_media = not banner_link.isEmpty() and video.isEmpty() and not image.isEmpty() %}
+        {% set linked_media = not banner_link.isEmpty() and not use_video and not image.isEmpty() %}
         {% set card_props = {
             orient: opendxp_checkbox('orient_row').isChecked() ? 'row' : null,
             ratio: ratio,
