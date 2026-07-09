@@ -58,6 +58,10 @@
             {% if style == 'banner' or style == 'card' %}
                 {{ opendxp_link('banner_link') }}
             {% endif %}
+            {% if style == 'banner' %}
+                {{ eyebrow_editable|raw }}
+                {{ title_editable|raw }}
+            {% endif %}
             {% if has_body %}
                 {{ eyebrow_editable|raw }}
                 {{ title_editable|raw }}
@@ -67,28 +71,52 @@
                 </div>
             {% endif %}
         </div>
-    {% elseif style == 'full' or style == 'banner' %}
+    {% elseif style == 'full' %}
         {% if has_media %}
-            {% set banner_link = opendxp_link('banner_link') %}
-            {% set block %}
-                {%- cui 'media-full' with {
-                    ratio: ratio,
-                    bleed: full_width,
-                    radius: opendxp_checkbox('no_radius').isChecked() ? 'none' : null,
-                } -%}
-                    {{- media|raw -}}
-                {%- endcui -%}
-            {% endset %}
-            {% if style == 'banner' and not banner_link.isEmpty() %}
-                <a{{ cui_attrs({
-                    href: banner_link.getHref(),
-                    target: banner_link.getTarget() ?: null,
-                    'aria-label': banner_link.getText() ?: null,
-                }) }}>{{ block|raw }}</a>
-            {% else %}
-                {{ block|raw }}
+            {% cui 'media-full' with {
+                ratio: ratio,
+                bleed: full_width,
+                radius: opendxp_checkbox('no_radius').isChecked() ? 'none' : null,
+            } %}
+                {{- media|raw -}}
+            {% endcui %}
+        {% endif %}
+    {% elseif style == 'banner' %}
+        {# Banner: a media card whose media element is wrapped in the link, with an
+           optional eyebrow and heading. For images the media-card links natively
+           (image + href); for video/custom media the link is applied in the slot. #}
+        {% set banner_link = opendxp_link('banner_link') %}
+        {% set linked_image = not banner_link.isEmpty() and not use_video and not image.isEmpty() %}
+        {% set card_props = {
+            ratio: ratio,
+            eyebrow: eyebrow,
+            title: title,
+        }|filter(value => value is not empty) %}
+        {% if linked_image %}
+            {% set card_props = card_props|merge({
+                image: image.getSrc(),
+                image_alt: image.getAlt(),
+                href: banner_link.getHref(),
+            }) %}
+            {% if banner_link.getText() %}
+                {% set card_props = card_props|merge({media_label: banner_link.getText()}) %}
             {% endif %}
         {% endif %}
+        {% cui 'media-card' with card_props %}
+            {% if has_media and not linked_image %}
+                {% cui_slot 'media' %}
+                    {%- if not banner_link.isEmpty() -%}
+                        <a{{ cui_attrs({
+                            href: banner_link.getHref(),
+                            target: banner_link.getTarget() ?: null,
+                            'aria-label': banner_link.getText() ?: title ?: null,
+                        }) }}>{{ media|raw }}</a>
+                    {%- else -%}
+                        {{- media|raw -}}
+                    {%- endif -%}
+                {% endcui_slot %}
+            {% endif %}
+        {% endcui %}
     {% elseif style == 'card' %}
         {% set card_style = opendxp_select('card_style').getData()|default('') %}
         {% set banner_link = opendxp_link('banner_link') %}

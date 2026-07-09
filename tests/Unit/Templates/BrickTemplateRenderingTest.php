@@ -284,32 +284,55 @@ final class BrickTemplateRenderingTest extends Unit
         $this->assertStringNotContainsString('<video', $html, 'a set video is ignored unless the media type is video');
     }
 
-    public function testMediaBannerFrontendWrapsMediaInLink(): void
+    public function testMediaBannerFrontendIsAMediaCardWithLinkedMedia(): void
     {
         $html = BrickTwigEnvironment::render('cui-media', false, [
             'style' => 'banner',
             'ratio' => 'wide',
             'image' => '/media/promo.jpg',
+            'eyebrow' => 'Now on',
+            'title' => 'Summer promo',
+            'banner_link' => ['href' => '/promo', 'text' => 'Summer promo'],
+        ]);
+
+        $this->assertStringContainsString('class="cui-surface cui-media-card"', $html);
+        $this->assertStringContainsString('data-ratio="wide"', $html);
+        // The link surrounds the media element (native media-card linked media).
+        $this->assertStringContainsString(
+            '<a class="cui-media-card-media" href="/promo" aria-label="Summer promo"><img src="/media/promo.jpg" alt=""></a>',
+            $html,
+        );
+        // Optional eyebrow and heading render, and the heading also links.
+        $this->assertStringContainsString('<p class="cui-eyebrow">Now on</p>', $html);
+        $this->assertStringContainsString('<h3><a href="/promo">Summer promo</a></h3>', $html);
+    }
+
+    public function testMediaBannerVideoWrapsMediaSlotInLink(): void
+    {
+        $html = BrickTwigEnvironment::render('cui-media', false, [
+            'style' => 'banner',
+            'media_type' => 'video',
+            'image' => '/media/poster.jpg',
+            'video' => '/media/clip.mp4',
             'banner_link' => ['href' => '/promo', 'text' => 'Summer promo', 'target' => '_blank'],
         ]);
 
+        $this->assertStringContainsString('class="cui-surface cui-media-card"', $html);
         $this->assertMatchesRegularExpression(
-            '~<a href="/promo" target="_blank" aria-label="Summer promo">\s*<div class="cui-media-full" data-ratio="wide">~',
+            '~<div class="cui-media-card-media"><a href="/promo" target="_blank" aria-label="Summer promo"><video src="/media/clip.mp4"></video></a></div>~',
             $html,
-            'the link must surround the media block',
         );
-        $this->assertMatchesRegularExpression('~</div>\s*</a>~', $html);
-        $this->assertStringContainsString('<img src="/media/promo.jpg" alt="">', $html);
     }
 
-    public function testMediaBannerWithoutLinkFallsBackToPlainBlock(): void
+    public function testMediaBannerWithoutLinkRendersUnlinkedMedia(): void
     {
         $html = BrickTwigEnvironment::render('cui-media', false, [
             'style' => 'banner',
             'image' => '/media/promo.jpg',
         ]);
 
-        $this->assertStringContainsString('class="cui-media-full"', $html);
+        $this->assertStringContainsString('class="cui-surface cui-media-card"', $html);
+        $this->assertStringContainsString('<div class="cui-media-card-media"><img src="/media/promo.jpg" alt=""></div>', $html);
         $this->assertStringNotContainsString('<a ', $html);
     }
 
@@ -428,6 +451,8 @@ final class BrickTemplateRenderingTest extends Unit
 
         $banner = BrickTwigEnvironment::render('cui-media', true, ['style' => 'banner']);
         $this->assertStringContainsString('<x-editable data-type="link" data-name="banner_link">', $banner);
+        $this->assertStringContainsString('<x-editable data-type="input" data-name="eyebrow">', $banner, 'banner offers an optional eyebrow');
+        $this->assertStringContainsString('<x-editable data-type="input" data-name="title">', $banner, 'banner offers an optional heading');
         $this->assertStringNotContainsString('data-name="body"', $banner, 'banner style has no body copy');
     }
 

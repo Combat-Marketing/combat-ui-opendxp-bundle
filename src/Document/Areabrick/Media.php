@@ -40,7 +40,7 @@ class Media extends AbstractCuiAreabrick implements EditableDialogBoxInterface
                     $this->selectField('style', 'Style', [
                         ['', 'Figure with caption'],
                         ['full', 'Full-width media'],
-                        ['banner', 'Banner (linked image)'],
+                        ['banner', 'Banner (linked media card)'],
                         ['card', 'Media card'],
                         ['overlay', 'Overlay card'],
                     ]),
