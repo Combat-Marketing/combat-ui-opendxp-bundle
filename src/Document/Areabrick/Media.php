@@ -81,7 +81,7 @@ class Media extends AbstractCuiAreabrick implements EditableDialogBoxInterface
                         ['top', 'Top gradient'],
                         ['none', 'None'],
                     ]),
-                    $this->checkboxField('no_radius', 'Remove rounded corners (full-width style)'),
+                    $this->checkboxField('no_radius', 'Remove rounded corners'),
                 ],
             ]),
         ], 560);

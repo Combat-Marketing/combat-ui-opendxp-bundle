@@ -284,7 +284,7 @@ final class BrickTemplateRenderingTest extends Unit
         $this->assertStringNotContainsString('<video', $html, 'a set video is ignored unless the media type is video');
     }
 
-    public function testMediaBannerFrontendIsAMediaCardWithLinkedMedia(): void
+    public function testMediaBannerFrontendLinksMediaWithHeadingBelow(): void
     {
         $html = BrickTwigEnvironment::render('cui-media', false, [
             'style' => 'banner',
@@ -292,22 +292,24 @@ final class BrickTemplateRenderingTest extends Unit
             'image' => '/media/promo.jpg',
             'eyebrow' => 'Now on',
             'title' => 'Summer promo',
-            'banner_link' => ['href' => '/promo', 'text' => 'Summer promo'],
+            'banner_link' => ['href' => '/promo', 'text' => 'Summer promo', 'target' => '_blank'],
         ]);
 
-        $this->assertStringContainsString('class="cui-surface cui-media-card"', $html);
-        $this->assertStringContainsString('data-ratio="wide"', $html);
-        // The link surrounds the media element (native media-card linked media).
-        $this->assertStringContainsString(
-            '<a class="cui-media-card-media" href="/promo" aria-label="Summer promo"><img src="/media/promo.jpg" alt=""></a>',
+        // No card chrome/padding — a plain stack with the linked media and heading below it.
+        $this->assertStringNotContainsString('cui-media-card', $html);
+        $this->assertStringContainsString('<div class="cui-stack">', $html);
+        // Only the media element is wrapped in the link.
+        $this->assertMatchesRegularExpression(
+            '~<a href="/promo" target="_blank" aria-label="Summer promo"><div class="cui-media-full" data-ratio="wide"><img src="/media/promo.jpg" alt=""></div>\s*</a>~',
             $html,
         );
-        // Optional eyebrow and heading render, and the heading also links.
+        // Optional eyebrow and heading render below; the heading is an h2.cui-display and is NOT linked.
         $this->assertStringContainsString('<p class="cui-eyebrow">Now on</p>', $html);
-        $this->assertStringContainsString('<h3><a href="/promo">Summer promo</a></h3>', $html);
+        $this->assertStringContainsString('<h2 class="cui-display">Summer promo</h2>', $html);
+        $this->assertStringNotContainsString('<a href="/promo">Summer promo</a>', $html, 'the heading must not be linked');
     }
 
-    public function testMediaBannerVideoWrapsMediaSlotInLink(): void
+    public function testMediaBannerVideoWrapsMediaInLink(): void
     {
         $html = BrickTwigEnvironment::render('cui-media', false, [
             'style' => 'banner',
@@ -317,9 +319,10 @@ final class BrickTemplateRenderingTest extends Unit
             'banner_link' => ['href' => '/promo', 'text' => 'Summer promo', 'target' => '_blank'],
         ]);
 
-        $this->assertStringContainsString('class="cui-surface cui-media-card"', $html);
+        // No heading → just the linked media, no stack wrapper.
+        $this->assertStringNotContainsString('cui-stack', $html);
         $this->assertMatchesRegularExpression(
-            '~<div class="cui-media-card-media"><a href="/promo" target="_blank" aria-label="Summer promo"><video src="/media/clip.mp4"></video></a></div>~',
+            '~<a href="/promo" target="_blank" aria-label="Summer promo"><div class="cui-media-full"><video src="/media/clip.mp4"></video></div>\s*</a>~',
             $html,
         );
     }
@@ -329,10 +332,10 @@ final class BrickTemplateRenderingTest extends Unit
         $html = BrickTwigEnvironment::render('cui-media', false, [
             'style' => 'banner',
             'image' => '/media/promo.jpg',
+            'no_radius' => true,
         ]);
 
-        $this->assertStringContainsString('class="cui-surface cui-media-card"', $html);
-        $this->assertStringContainsString('<div class="cui-media-card-media"><img src="/media/promo.jpg" alt=""></div>', $html);
+        $this->assertStringContainsString('<div class="cui-media-full" data-radius="none"><img src="/media/promo.jpg" alt=""></div>', $html);
         $this->assertStringNotContainsString('<a ', $html);
     }
 
@@ -352,7 +355,7 @@ final class BrickTemplateRenderingTest extends Unit
         $this->assertStringContainsString('<article class="cui-surface cui-media-card" data-orient="row" data-elevation="flat">', $html);
         $this->assertStringContainsString('<div class="cui-media-card-media"><img src="/media/cover.jpg" alt=""></div>', $html);
         $this->assertStringContainsString('<p class="cui-eyebrow">Spotlight</p>', $html);
-        $this->assertStringContainsString('<h3>Card title</h3>', $html);
+        $this->assertStringContainsString('<h3 class="cui-display">Card title</h3>', $html);
         $this->assertStringContainsString('<p>Card copy</p>', $html);
         $this->assertStringContainsString('<a class="cui-button" data-variant="primary" href="/post">Read more</a>', $html);
         $this->assertLessThan(
@@ -405,6 +408,40 @@ final class BrickTemplateRenderingTest extends Unit
 
         $this->assertStringContainsString('data-variant="borderless"', $html);
         $this->assertStringNotContainsString('data-elevation=', $html);
+    }
+
+    /**
+     * "Remove rounded corners" is not tied to a single style — every variant that renders a
+     * media surface maps it onto that block's [data-radius="none"].
+     *
+     * @return array<string, array{0: string, 1: string}> style => the block wrapper that carries data-radius
+     */
+    public static function radiusVariantProvider(): array
+    {
+        return [
+            'figure' => ['', 'cui-figure'],
+            'full' => ['full', 'cui-media-full'],
+            'banner' => ['banner', 'cui-media-full'],
+            'card' => ['card', 'cui-media-card'],
+            'overlay' => ['overlay', 'cui-media-overlay'],
+        ];
+    }
+
+    /**
+     * @dataProvider radiusVariantProvider
+     */
+    public function testMediaRemoveRadiusAppliesToEveryVariant(string $style, string $block): void
+    {
+        $html = BrickTwigEnvironment::render('cui-media', false, [
+            'style' => $style,
+            'image' => '/media/cover.jpg',
+            'title' => 'Heading',
+            'no_radius' => true,
+        ]);
+
+        // Only one block renders, so data-radius="none" can only belong to it.
+        $this->assertStringContainsString($block, $html, $style . ' should render the ' . $block . ' block');
+        $this->assertStringContainsString('data-radius="none"', $html, $style . ' must drop the corner radius');
     }
 
     public function testMediaOverlayFrontend(): void

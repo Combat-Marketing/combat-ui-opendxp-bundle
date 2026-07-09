@@ -22,6 +22,7 @@
 {% set title_editable = opendxp_input('title', {placeholder: 'Title'}) %}
 {% set eyebrow = eyebrow_editable.getData() %}
 {% set title = title_editable.getData() %}
+{% set no_radius = opendxp_checkbox('no_radius').isChecked() %}
 
 {% set full_width = width == 'none' %}
 {% set section_props = full_width ? {} : {container: width ?: 'default'} %}
@@ -45,79 +46,93 @@
 
 {% cui 'section' with section_props %}
     {% if editmode %}
-        <div class="cui-stack">
-            {# The dialog's "Media type" select decides which media editable is edited inline. #}
-            {%- if use_video -%}
-                {{- video|raw -}}
-            {%- else -%}
-                {{- image|raw -}}
-            {%- endif -%}
-            {% if style == 'figure' %}
-                {{ caption_editable|raw }}
-            {% endif %}
-            {% if style == 'banner' or style == 'card' %}
-                {{ opendxp_link('banner_link') }}
-            {% endif %}
-            {% if style == 'banner' %}
-                {{ eyebrow_editable|raw }}
-                {{ title_editable|raw }}
-            {% endif %}
-            {% if has_body %}
-                {{ eyebrow_editable|raw }}
-                {{ title_editable|raw }}
-                {{ opendxp_wysiwyg('body') }}
-                <div class="cui-cluster">
-                    {% include '@CombatUIOpenDxp/areas/_partials/actions.html.twig' %}
+        {# The dialog's "Media type" select decides which media editable is edited inline. #}
+        {% if style == 'card' %}
+            {# Preview the card layout so "Media beside body" (orient) and "Reverse order" are visible
+               while editing: a cluster lays media beside the body, a stack keeps them column; the
+               reverse toggle swaps the media to the end. No card chrome so editor UI is not clipped. #}
+            {% set reverse = opendxp_checkbox('reverse').isChecked() %}
+            <div class="{{ opendxp_checkbox('orient_row').isChecked() ? 'cui-cluster' : 'cui-stack' }}">
+                {% if not reverse %}{%- if use_video -%}{{ video|raw }}{%- else -%}{{ image|raw }}{%- endif -%}{% endif %}
+                <div class="cui-stack">
+                    {{ opendxp_link('banner_link') }}
+                    {{ eyebrow_editable|raw }}
+                    {{ title_editable|raw }}
+                    {{ opendxp_wysiwyg('body') }}
+                    <div class="cui-cluster">
+                        {% include '@CombatUIOpenDxp/areas/_partials/actions.html.twig' %}
+                    </div>
                 </div>
-            {% endif %}
-        </div>
+                {% if reverse %}{%- if use_video -%}{{ video|raw }}{%- else -%}{{ image|raw }}{%- endif -%}{% endif %}
+            </div>
+        {% else %}
+            <div class="cui-stack">
+                {%- if use_video -%}
+                    {{- video|raw -}}
+                {%- else -%}
+                    {{- image|raw -}}
+                {%- endif -%}
+                {% if style == 'figure' %}
+                    {{ caption_editable|raw }}
+                {% endif %}
+                {% if style == 'banner' %}
+                    {{ opendxp_link('banner_link') }}
+                    {{ eyebrow_editable|raw }}
+                    {{ title_editable|raw }}
+                {% endif %}
+                {% if style == 'overlay' %}
+                    {{ eyebrow_editable|raw }}
+                    {{ title_editable|raw }}
+                    {{ opendxp_wysiwyg('body') }}
+                    <div class="cui-cluster">
+                        {% include '@CombatUIOpenDxp/areas/_partials/actions.html.twig' %}
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
     {% elseif style == 'full' %}
         {% if has_media %}
             {% cui 'media-full' with {
                 ratio: ratio,
                 bleed: full_width,
-                radius: opendxp_checkbox('no_radius').isChecked() ? 'none' : null,
+                radius: no_radius ? 'none' : null,
             } %}
                 {{- media|raw -}}
             {% endcui %}
         {% endif %}
     {% elseif style == 'banner' %}
-        {# Banner: a media card whose media element is wrapped in the link, with an
-           optional eyebrow and heading. For images the media-card links natively
-           (image + href); for video/custom media the link is applied in the slot. #}
+        {# Banner: a linked media element with an optional eyebrow and heading below it. Unlike the
+           card it brings no surface or padding — just the media (wrapped in the link) and, when set,
+           a .cui-eyebrow and an h2.cui-display. Only the media carries the link, never the heading. #}
         {% set banner_link = opendxp_link('banner_link') %}
-        {% set linked_image = not banner_link.isEmpty() and not use_video and not image.isEmpty() %}
-        {% set card_props = {
-            ratio: ratio,
-            eyebrow: eyebrow,
-            title: title,
-            title_tag: 'h2',
-        }|filter(value => value is not empty) %}
-        {% if linked_image %}
-            {% set card_props = card_props|merge({
-                image: image.getSrc(),
-                image_alt: image.getAlt(),
-                href: banner_link.getHref(),
-            }) %}
-            {% if banner_link.getText() %}
-                {% set card_props = card_props|merge({media_label: banner_link.getText()}) %}
-            {% endif %}
-        {% endif %}
-        {% cui 'media-card' with card_props %}
-            {% if has_media and not linked_image %}
-                {% cui_slot 'media' %}
-                    {%- if not banner_link.isEmpty() -%}
-                        <a{{ cui_attrs({
-                            href: banner_link.getHref(),
-                            target: banner_link.getTarget() ?: null,
-                            'aria-label': banner_link.getText() ?: title ?: null,
-                        }) }}>{{ media|raw }}</a>
-                    {%- else -%}
+        {% set has_heading = eyebrow is not empty or title is not empty %}
+        {% set media_block %}
+            {%- if has_media -%}
+                {%- set block -%}
+                    {%- cui 'media-full' with {ratio: ratio, radius: no_radius ? 'none' : null} -%}
                         {{- media|raw -}}
-                    {%- endif -%}
-                {% endcui_slot %}
-            {% endif %}
-        {% endcui %}
+                    {%- endcui -%}
+                {%- endset -%}
+                {%- if not banner_link.isEmpty() -%}
+                    <a{{ cui_attrs({
+                        href: banner_link.getHref(),
+                        target: banner_link.getTarget() ?: null,
+                        'aria-label': banner_link.getText() ?: title ?: null,
+                    }) }}>{{ block|raw }}</a>
+                {%- else -%}
+                    {{- block|raw -}}
+                {%- endif -%}
+            {%- endif -%}
+        {% endset %}
+        {% if has_heading %}
+            <div class="cui-stack">
+                {{ media_block|raw }}
+                {% if eyebrow is not empty %}<p class="cui-eyebrow">{{ eyebrow }}</p>{% endif %}
+                {% if title is not empty %}<h2 class="cui-display">{{ title }}</h2>{% endif %}
+            </div>
+        {% else %}
+            {{ media_block|raw }}
+        {% endif %}
     {% elseif style == 'card' %}
         {% set card_style = opendxp_select('card_style').getData()|default('') %}
         {% set banner_link = opendxp_link('banner_link') %}
@@ -125,6 +140,7 @@
         {% set card_props = {
             orient: opendxp_checkbox('orient_row').isChecked() ? 'row' : null,
             ratio: ratio,
+            radius: no_radius ? 'none' : null,
             elevation: card_style == 'flat' ? 'flat' : null,
             variant: card_style == 'borderless' ? 'borderless' : null,
             media_position: opendxp_checkbox('reverse').isChecked() ? 'end' : null,
@@ -159,6 +175,7 @@
             align: align,
             scrim: opendxp_select('scrim').getData(),
             ratio: ratio,
+            radius: no_radius ? 'none' : null,
             eyebrow: eyebrow,
             title: title,
         }|filter(value => value is not empty) %}
@@ -180,6 +197,7 @@
             {% set figure_props = {
                 ratio: ratio,
                 align: align == 'center' ? 'center' : null,
+                radius: no_radius ? 'none' : null,
                 bleed: full_width,
                 caption: caption_editable.getData(),
             }|filter(value => value is not empty) %}
