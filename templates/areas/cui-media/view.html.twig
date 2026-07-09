@@ -91,6 +91,7 @@
             ratio: ratio,
             eyebrow: eyebrow,
             title: title,
+            title_tag: 'h2',
         }|filter(value => value is not empty) %}
         {% if linked_image %}
             {% set card_props = card_props|merge({
